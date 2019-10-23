@@ -14,12 +14,14 @@ spatial_sample_plus_close_pairs(coords, n_close, n_spatial)
 
 \item{n_spatial}{Optional. The number of spatially dispersed points to select.}
 }
+\value{
+Returns a list with 'sample' - the coordinates of selected points and 'sample_idx' - the row indeces of the selected coordinates.
+}
 \description{
 Take a spatially dispersed sample from a set of 2D points, with optional inclusion of close-pairs of points. 
 Designed for estimation of spatial covariance.
 }
 \examples{
-# Generate hexbins and calculate raster mean in each bin
 coords <- data.frame(x = runif(1000,0,1), y = runif(1000,0,1))
 samp <- spatial_sample_plus_close_pairs(coords, n_close = 50, n_spatial = 50)
 plot(coords, col="gray"); points(coords[samp,], pch=16)
