@@ -4,9 +4,11 @@
 #' @param coords A matrix or data frame of 2 columns representing x and y coordinates of points to sample from.
 #' @param n_close Optional. The number of closely separated points to select. Must be multiple of 5. 
 #' @param n_spatial Optional. The number of spatially dispersed points to select. 
+#' @return Returns a list with 'sample' - the coordinates of selected points and 'sample_idx' - the row indeces of the selected coordinates. 
+#' @export
 #' @import RANN
 #' @keywords hexbin
-#' @examples # Generate hexbins and calculate raster mean in each bin
+#' @examples 
 #' coords <- data.frame(x = runif(1000,0,1), y = runif(1000,0,1))
 #' samp <- spatial_sample_plus_close_pairs(coords, n_close = 50, n_spatial = 50)
 #' plot(coords, col="gray"); points(coords[samp,], pch=16)
