@@ -1,0 +1,11 @@
+Package: DiSARM
+Title: A collection of spatial analysis functions related to the DiSARM project at UCSF
+Version: 0.0.0.9000
+Authors@R: person("Hugh", "Sturrock", email = "hughsturrock@gmail.com", role = c("aut", "cre"))
+Description: A collection of spatial analysis functions related to the DiSARM project at UCSF.
+Depends: R (>= 3.5.3)
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports: leaflet, raster, sp, magick, velox, sf, RANN, spaMM, 
+RoxygenNote: 6.1.1
