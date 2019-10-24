@@ -1,4 +1,4 @@
-#' Function to fit a 10 fold cross validated ML model. Currently only support binomial data.
+#' Function to make quick leaflet maps of spatial data
 #' @param plot_data An sp, sf or rasterLayer object to plot
 #' @param value_field Names of column corresponding to values to plot
 #' @param colors Optional set of hexcolors to create a color palette from
@@ -7,7 +7,15 @@
 
 quick_map <- function(plot_data, value_field, colors=NULL, circle_size = 3){
   
-  # efine basemap
+  if(is.null(plot_data)){
+    stop("'plot_data' not defined")
+  }
+  
+  if(is.null(value_field)){
+    stop("'value_field' not defined")
+  }
+  
+  # Define basemap
   basemap <- leaflet() %>% addProviderTiles("CartoDB.Positron") 
 
   if(is.null(colors)){
