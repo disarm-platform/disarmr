@@ -19,7 +19,7 @@ quick_map <- function(plot_data, value_field, colors=NULL, circle_size = 3){
     
     col_pal <- colorNumeric(colors,
                  values(plot_data), na.color = NA)
-    map <- basemap %>% addRasterImage(plot_data, col_pal) %>%
+    map <- basemap %>% addRasterImage(plot_data, col_pal, opacity = 0.7) %>%
       addLegend(pal=col_pal, values=values(plot_data), title = names(plot_data))
   }
   
