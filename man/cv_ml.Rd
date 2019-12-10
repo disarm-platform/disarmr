@@ -4,14 +4,16 @@
 \alias{cv_ml}
 \title{Function to fit a 10 fold cross validated ML model. Currently only support binomial data.}
 \usage{
-cv_ml(points, layer_names, model_type = "randomforest")
+cv_ml(points, layer_names, model_type = "randomforest", k = 20)
 }
 \arguments{
 \item{points}{A data.frame or sfc object containing `n_trials`, `n_positive` fields}
 
 \item{layer_names}{Names of column corresponding covariates to use}
 
-\item{model_type}{Either `randomForest`, in which case a random forest 
+\item{model_type}{Either `randomForest`, in which case a random forest}
+
+\item{k}{The number of folds to use
 using the ranger package is fit or `hal`, in which case
 a highly adaptive lasso using the hal9001 package is fit. Note the `hal` 
 is computationally expensive and not recommended for large 

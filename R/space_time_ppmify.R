@@ -52,7 +52,7 @@ space_time_ppmify <- function(points,
   prediction_exposure_raster <- raster::resample(prediction_exposure_raster, exposure_raster)
   reference_raster <- exposure_raster # TODO - allow this to be controlled as parameter in function when exposure not provided using boundary and resolution
   points_coords <- st_coordinates(points)
-  
+
   # Make ppmify object
   ppmx <- ppmify::ppmify(points_coords, 
                          area = exposure_raster,

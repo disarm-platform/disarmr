@@ -5,6 +5,7 @@
 #' @param ppm_cases_points_counts
 #' @param exposure_raster
 #' @param num_periods
+#' @import velox
 
 get_int_points_exposure_weights <- function(ppmx, ppm_cases_points_counts, exposure_raster, num_periods){
 
@@ -57,6 +58,7 @@ get_int_points_exposure_weights <- function(ppmx, ppm_cases_points_counts, expos
 #' @param num_periods
 #' @param date_start_end
 #' @param reference_raster
+#' @import lubridate
 
 
 # Deal with case points
@@ -71,7 +73,7 @@ aggregate_points_space_time <- function(points, ppmx, num_periods, date_start_en
       dates <- seq(ymd(date_start_end[1]), ymd(date_start_end[2]), 1)
       date_breaks <- c(levels(cut.Date(dates, num_periods, right=TRUE, include.lowest = TRUE)),
                        date_start_end[2])
-      browser()
+
       for(i in 1:num_periods){
         
         cases_model_period <- as.numeric(cut.Date(ymd(points$date), ymd(date_breaks)))

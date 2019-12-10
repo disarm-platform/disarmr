@@ -2,14 +2,15 @@
 #' @param points A data.frame or sfc object containing `n_trials`, `n_positive` fields
 #' @param layer_names Names of column corresponding covariates to use
 #' @param model_type Either `randomForest`, in which case a random forest 
+#' @param k The number of folds to use
 #' using the ranger package is fit or `hal`, in which case
 #' a highly adaptive lasso using the hal9001 package is fit. Note the `hal` 
 #' is computationally expensive and not recommended for large 
 #' (>200) datasets. 
-#' @import parallel
+#' @import parallel ranger caret hal9001
 #' @export
 
-cv_ml <- function(points, layer_names, model_type = "randomforest") {
+cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
 
   seed <- 1981
   points_df <- as.data.frame(points)
@@ -22,11 +23,12 @@ cv_ml <- function(points, layer_names, model_type = "randomforest") {
   
   # Create folds
   set.seed(seed)
-  folds_list <- origami::make_folds(points_df_train)
+  #folds_list <- origami::make_folds(points_df_train)
+  folds_list <- caret::createFolds(points_df_train$n_positive, k=k)
   folds_df_list <- lapply(folds_list, folds_list_to_df_list, df = points_df_train)
   
   # Save validation indeces for later
-  valid_indeces <- unlist(sapply(folds_list, function(x){x$validation_set}))
+  valid_indeces <- unlist(folds_list)
   
   if(model_type == "hal"){
   # Now apply HAL to each fold in parallel 

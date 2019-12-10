@@ -40,7 +40,7 @@ resolution as `exposure`. Defaults to `exposure`.}
 data frame required for prediction (i.e. raster cells)? Defaults to FALSE.}
 }
 \value{
-A data.frame object with 
+A data.frame object with the following fields:
 \itemize{
   \item x - x coordinates
   \item y - y coordinates

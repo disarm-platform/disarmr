@@ -3,27 +3,39 @@
 \name{spatial_sample_plus_close_pairs}
 \alias{spatial_sample_plus_close_pairs}
 \title{Take a spatially dispersed sample from a set of 2D points, with optional inclusion of close-pairs of points. 
-Designed for estimation of spatial covariance.}
+Designed for estimation of spatial covariance an spatial prediction. The algorithm works by first selecting 
+a single site randomly and then iteratively selecting further sites with probability proportional to the 
+distance to nearest selected site (i.e. there is a greater probability of being selected the further a site
+is from the nearest selected site). If `n_close` is specified, then clusters of close pairs of points are 
+included in the selection.}
 \usage{
-spatial_sample_plus_close_pairs(coords, n_close, n_spatial)
+spatial_sample_plus_close_pairs(coords, n_close = 0, n_spatial,
+  power = 1)
 }
 \arguments{
-\item{coords}{A matrix or data frame of 2 columns representing x and y coordinates of points to sample from.}
+\item{coords}{An sf object of points to sample from.}
 
 \item{n_close}{Optional. The number of closely separated points to select. Must be multiple of 5.}
 
 \item{n_spatial}{Optional. The number of spatially dispersed points to select.}
+
+\item{power}{Controls the relative influence of distance between selected and unselected sites when selecting sites}
 }
 \value{
 Returns a list with 'sample' - the coordinates of selected points and 'sample_idx' - the row indeces of the selected coordinates.
 }
 \description{
 Take a spatially dispersed sample from a set of 2D points, with optional inclusion of close-pairs of points. 
-Designed for estimation of spatial covariance.
+Designed for estimation of spatial covariance an spatial prediction. The algorithm works by first selecting 
+a single site randomly and then iteratively selecting further sites with probability proportional to the 
+distance to nearest selected site (i.e. there is a greater probability of being selected the further a site
+is from the nearest selected site). If `n_close` is specified, then clusters of close pairs of points are 
+included in the selection.
 }
 \examples{
 coords <- data.frame(x = runif(1000,0,1), y = runif(1000,0,1))
-samp <- spatial_sample_plus_close_pairs(coords, n_close = 50, n_spatial = 50)
-plot(coords, col="gray"); points(coords[samp,], pch=16)
+points <- st_as_sf(SpatialPoints(coords))
+samp <- spatial_sample_plus_close_pairs(points, n_close = 50, n_spatial = 50)
+plot(coords, col="gray"); points(coords[samp$sample_idx,], pch=16)
 }
 \keyword{hexbin}
