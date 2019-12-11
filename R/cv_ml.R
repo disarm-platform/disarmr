@@ -8,7 +8,7 @@
 #' a highly adaptive lasso using the hal9001 package is fit. Note the `hal` 
 #' is computationally expensive and not recommended for large 
 #' (>200) datasets. 
-#' @import parallel ranger caret 
+#' @import parallel ranger caret
 #' @export
 cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
 
