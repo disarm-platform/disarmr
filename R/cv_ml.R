@@ -1,4 +1,5 @@
 #' Function to fit a 10 fold cross validated ML model. Currently only support binomial data.
+#' @name cv_ml
 #' @param points A data.frame or sfc object containing `n_trials`, `n_positive` fields
 #' @param layer_names Names of column corresponding covariates to use
 #' @param model_type Either `randomForest`, in which case a random forest 
@@ -32,7 +33,7 @@ cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
   if(model_type == "hal"){
   # Now apply HAL to each fold in parallel 
   cv_predictions <- parallel::mclapply(folds_df_list, FUN = fit_hal_parallel,
-                             mc.cores = detectCores() - 1,
+                             mc.cores = parallel::detectCores() - 1,
                              X_var = layer_names,
                              n_pos_var = "n_positive",
                              n_neg_var = "n_negative")
@@ -52,9 +53,8 @@ cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
   
   
   if(model_type == "randomforest"){
-    
     cv_predictions <- parallel::mclapply(folds_df_list, FUN = fit_rf_parallel,
-                                         mc.cores = detectCores() - 1,
+                                         mc.cores = parallel::detectCores() - 1,
                                          X_var = layer_names,
                                          n_pos_var = "n_positive",
                                          n_neg_var = "n_negative")

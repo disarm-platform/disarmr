@@ -3,9 +3,6 @@
 \name{fit_rf_parallel}
 \alias{fit_rf_parallel}
 \title{Helper function to fit a random forest to a fold as part of parallelized call}
-\usage{
-fit_rf_parallel(folds_df_list_fold, X_var, n_pos_var, n_neg_var)
-}
 \arguments{
 \item{folds_df_list_fold}{}
 

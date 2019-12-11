@@ -1,11 +1,12 @@
 #' Helper function to fit a random forest to a fold as part of parallelized call
+#' @name fit_rf_parallel
 #' @param folds_df_list_fold 
 #' @param X_var Names of column corresponding covariates to use
 #' @param n_pos_var Name of column corresponding to numbers positive
 #' @param n_neg_var Name of column corresponding to numbers negative
 #' @import ranger parallel
 #' @export
-
+library(ranger)
 fit_rf_parallel <- function(folds_df_list_fold, 
                             X_var,
                             n_pos_var,
@@ -23,7 +24,7 @@ fit_rf_parallel <- function(folds_df_list_fold,
   names(pred_data) <- X_var
   
   rf_formula <- as.formula(paste("Y", "~", paste(X_var, collapse = "+")))
-  rf_mod <- ranger(rf_formula,
+  rf_mod <- ranger::ranger(rf_formula,
                    seed = 1981,
                    data = mod_data,
                    probability = TRUE,

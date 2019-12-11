@@ -1,3 +1,17 @@
+#' Finds optimal range parameter for GP GAM
+#' @name optimal_range
+#' @param y vector of outcome
+#' @param x vector of column names of covariates
+#' @param coords_cols vector of length 2 referring to column names of x and y coordinates
+#' @param min_dist min range 
+#' @param max_dist max range
+#' @param length.out number of possible ranges to try
+#' @param model_data model data
+#' @param m1 numeric argument (1-5) referring to covariance function to use
+#' @param k k argument for gam
+#' @import mgcv
+#' @export
+
 ## Useful R functions
 library(mgcv)
 
