@@ -1,4 +1,16 @@
-library(RANN)
+#' Identical to adaptive.sample from geosample package, except auto decreases delta if supplied value too large
+#' @name adaptive_sample_auto
+#' @param obj1 candidates
+#' @param obj2 existing sample
+#' @param pred.var.col pred.var.col
+#' @param excd.prob.col excd.prob.col
+#' @param batch.size batch size
+#' @param delta min distance
+#' @param criterion 'exceedprob' or 'predvar'
+#' @param poly poly
+#' @param plotit logical
+#' @import RANN
+#' @export
 
 adaptive_sample_auto <- function (obj1, obj2, pred.var.col = NULL, excd.prob.col = NULL, 
           batch.size = 1, delta, criterion, poly = NULL, plotit = TRUE) 
