@@ -5,8 +5,8 @@ library(ranger)
 # Helpers for cv-hal
 
 folds_list_to_df_list <- function(fold, df) {
-  train = df[fold$training_set, ]
-  valid = df[fold$validation_set, ]
+  train = df[-fold, ]
+  valid = df[fold, ]
   list(train = train,
        valid = valid)
 }
@@ -29,7 +29,7 @@ fit_rf_parallel <- function(folds_df_list_fold,
                              X_var,
                              n_pos_var,
                              n_neg_var){
-  
+
   # Reshape into 0 and 1 rows per observation
   Y <- factor(c(rep(0, nrow(folds_df_list_fold$train)),
          rep(1, nrow(folds_df_list_fold$train))))
