@@ -9,7 +9,6 @@
 #' (>200) datasets. 
 #' @import parallel ranger caret hal9001
 #' @export
-
 cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
 
   seed <- 1981

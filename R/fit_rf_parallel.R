@@ -3,7 +3,7 @@
 #' @param X_var Names of column corresponding covariates to use
 #' @param n_pos_var Name of column corresponding to numbers positive
 #' @param n_neg_var Name of column corresponding to numbers negative
-#' @import ranger
+#' @import ranger parallel
 #' @export
 
 fit_rf_parallel <- function(folds_df_list_fold, 
