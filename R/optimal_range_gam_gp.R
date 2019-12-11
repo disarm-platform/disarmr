@@ -14,12 +14,21 @@ optimal_range <- function(y,
   
   REML <- r <- seq(min_dist, max_dist, length.out = length.out)
   for (i in seq_along(r)) {
+    if(!is.null(x)){
     form <- as.formula(paste(y, "~", paste(x, collapse = "+"), "+",
                        "s(", coords_cols[1], ",", coords_cols[2], ", k = k, bs = 'gp', m = c(", 
                        m1, 
                        ",", 
                        r[i], 
                        "))"))
+    }else{
+      form <- as.formula(paste(y, "~", 
+                               "s(", coords_cols[1], ",", coords_cols[2], ", k = k, bs = 'gp', m = c(", 
+                               m1, 
+                               ",", 
+                               r[i], 
+                               "))")) 
+    }
     m <- gam(form, 
              family = "binomial", 
              data = model_data, 
