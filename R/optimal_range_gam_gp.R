@@ -3,7 +3,7 @@ library(mgcv)
 
 # Estimate optimal range parameter in a gp smooth
 optimal_range <- function(y, 
-                          x,
+                          x = NULL,
                           coords_cols,
                           min_dist, 
                           max_dist, 
