@@ -2,6 +2,7 @@
 #'
 #' This function builds off the ppmify function from Nick Golding's ppmify package, 
 #' converting your case data into a data.frame suitable for applying Poisson regression models.
+#' @name space_time_ppmify
 #' @param points sfc object with a `Date` associated with the point in yyyy-mm-dd format 
 #' @param layer_name Optional. Names of the bioclimatic/environmental layers to use as covariates. 
 #' Currently only uses static covariates. 
@@ -33,7 +34,7 @@
 #'   \item regression_weights - Number of `outcomes` per space-time cell, to be used as a regression weight
 #' }
 #' @export
-#' @import ppmify httr raster sf sp
+#' @import httr raster sf sp 
 #' @examples 
 
 space_time_ppmify <- function(points,
@@ -54,7 +55,7 @@ space_time_ppmify <- function(points,
   points_coords <- st_coordinates(points)
 
   # Make ppmify object
-  ppmx <- ppmify::ppmify(points_coords, 
+  ppmx <- ppmify(points_coords, 
                          area = exposure_raster,
                          #covariates = exposure_raster, 
                          density = density, #TODO change to be automatic

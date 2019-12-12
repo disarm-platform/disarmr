@@ -1,4 +1,5 @@
 #' Helper function to fit a highly adaptive lasso to a fold as part of parallelized call
+#' @name fit_hal_parallel
 #' @param folds_df_list_fold 
 #' @param X_var Names of column corresponding covariates to use
 #' @param n_pos_var Name of column corresponding to numbers positive
