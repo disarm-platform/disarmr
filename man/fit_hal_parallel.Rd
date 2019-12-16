@@ -3,6 +3,9 @@
 \name{fit_hal_parallel}
 \alias{fit_hal_parallel}
 \title{Helper function to fit a highly adaptive lasso to a fold as part of parallelized call}
+\usage{
+fit_hal_parallel(folds_df_list_fold, X_var, n_pos_var, n_neg_var)
+}
 \arguments{
 \item{folds_df_list_fold}{}
 

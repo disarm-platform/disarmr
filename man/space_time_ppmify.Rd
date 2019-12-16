@@ -5,8 +5,8 @@
 \title{The space_time_ppmify function}
 \usage{
 space_time_ppmify(points, layer_name = NULL, exposure, resolution = 1,
-  date_start_end, num_periods = 1, prediction_exposure, density,
-  prediction_frame = FALSE)
+  date_start_end, num_periods = 1, prediction_exposure = exposure,
+  density, prediction_frame = FALSE)
 }
 \arguments{
 \item{points}{sfc object with a `Date` associated with the point in yyyy-mm-dd format}
@@ -17,8 +17,8 @@ See [here under 'Layer names'](https://github.com/disarm-platform/fn-covariate-e
 for a list of options. If none provided, spatial only model is assumed.}
 
 \item{exposure}{rasterLayer of exposure (to be used as offset). Required. 
-Raster representing the population over which points arose. C
-urrently only accepts a single raster which is used across all time periods.}
+Raster representing the population over which points arose. Currently 
+only accepts a single raster which is used across all time periods.}
 
 \item{resolution}{Resolution in km2 that covariates and offset should be resampled to (>= 1km2). Defaults to 1.}
 
