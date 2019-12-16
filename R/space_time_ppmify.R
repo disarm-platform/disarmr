@@ -43,7 +43,7 @@ space_time_ppmify <- function(points,
                               resolution=1,
                               date_start_end, 
                               num_periods=1,
-                              prediction_exposure,
+                              prediction_exposure = exposure,
                               density,
                               prediction_frame=FALSE) {
   

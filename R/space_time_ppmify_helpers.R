@@ -71,16 +71,21 @@ aggregate_points_space_time <- function(points, ppmx, num_periods, date_start_en
       
       # Define date breaks
       dates <- seq(ymd(date_start_end[1]), ymd(date_start_end[2]), 1)
+      if(num_periods > 1){
       date_breaks <- c(levels(cut.Date(dates, num_periods, right=TRUE, include.lowest = TRUE)),
                        date_start_end[2])
+      }else{
+        date_breaks <- date_start_end
+      }
 
       for(i in 1:num_periods){
         
         cases_model_period <- as.numeric(cut.Date(ymd(points$date), ymd(date_breaks)))
         cases_period <- ppm_cases_points[cases_model_period==i,]
-        cases_period$period <- i
         
         if(nrow(cases_period)>0){
+          
+          cases_period$period <- i
           
           # calculate which cell each case is in
           cases_period$case_pixel <- raster::cellFromXY(reference_raster,
