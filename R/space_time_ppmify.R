@@ -9,8 +9,8 @@
 #' See [here under 'Layer names'](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md) 
 #' for a list of options. If none provided, spatial only model is assumed. 
 #' @param exposure rasterLayer of exposure (to be used as offset). Required. 
-#' Raster representing the population over which points arose. C
-#' urrently only accepts a single raster which is used across all time periods.
+#' Raster representing the population over which points arose. Currently 
+#' only accepts a single raster which is used across all time periods.
 #' @param resolution Resolution in km2 that covariates and offset should be resampled to (>= 1km2). Defaults to 1. 
 #' @param date_start_end Required. Vector of 2 values representing the start and end 
 #' times over which points were observed in yyyy-mm-dd format
@@ -46,10 +46,16 @@ space_time_ppmify <- function(points,
                               prediction_exposure = exposure,
                               density,
                               prediction_frame=FALSE) {
-  
+
   # run function and catch result
   exposure_raster <- exposure
   prediction_exposure_raster <- prediction_exposure
+  
+  # Resample to rough resolution in km
+  reference_raster <- raster(extent(exposure), res = resolution/111)
+  exposure_raster <- resample(exposure, reference_raster)
+    
+    
   prediction_exposure_raster <- raster::resample(prediction_exposure_raster, exposure_raster)
   reference_raster <- exposure_raster # TODO - allow this to be controlled as parameter in function when exposure not provided using boundary and resolution
   points_coords <- st_coordinates(points)
