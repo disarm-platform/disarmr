@@ -52,6 +52,7 @@ ppmify <- function (coords,
                     method = c('grid', 'count'),
                     density = 10) {
   
+
   # get the requested method
   method <- match.arg(method)
   
@@ -65,7 +66,6 @@ ppmify <- function (coords,
   int <- switch(method,
                 grid = grid(area, density),
                 count = NULL)
-  
   npts <- nrow(coords)
   nint <- nrow(int)
   

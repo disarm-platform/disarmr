@@ -22,7 +22,6 @@ gam_posterior_metrics <- function(gam_mod,
     return(as.vector(diff(quantiles)))
   }
   
-
   prevalence_prediction <- predict(gam_mod, new_data, type="response")
   prevalence_bci_width <- apply(sims, 1, get_bci_width)
   

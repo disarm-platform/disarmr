@@ -44,7 +44,7 @@ space_time_ppmify <- function(points,
                               date_start_end, 
                               num_periods=1,
                               prediction_exposure = exposure,
-                              density,
+                              approx_num_int_points = 10000,
                               prediction_frame=FALSE) {
 
   # run function and catch result
@@ -54,26 +54,29 @@ space_time_ppmify <- function(points,
   # Resample to rough resolution in km
   reference_raster <- raster(extent(exposure), res = resolution/111)
   exposure_raster <- resample(exposure, reference_raster)
-    
+  
+  # MAke sure the resampled exposure raster sums correctly
+  exposure_raster[which(exposure_raster[]<0)] <- 0
+  mult_factor <- cellStats(exposure, sum) / cellStats(exposure_raster, sum)
+  exposure_raster <- exposure_raster * mult_factor
+  
     
   prediction_exposure_raster <- raster::resample(prediction_exposure_raster, exposure_raster)
-  reference_raster <- exposure_raster # TODO - allow this to be controlled as parameter in function when exposure not provided using boundary and resolution
+  #reference_raster <- exposure_raster # TODO - allow this to be controlled as parameter in function when exposure not provided using boundary and resolution
   points_coords <- st_coordinates(points)
 
   # Make ppmify object
-  ppmx <- ppmify(points_coords, 
+  ppmx <- get_ppm(points_coords, 
                          area = exposure_raster,
-                         #covariates = exposure_raster, 
-                         density = density, #TODO change to be automatic
-                         method = "grid")
-  
+                  approx_num_int_points = floor(approx_num_int_points / num_periods))
+
   # Aggregate points in space/time (i.e. aggregate points in same pixel)
   ppm_cases_points_counts <- aggregate_points_space_time(points, ppmx, num_periods, date_start_end, reference_raster)
   
   # Make these population extractions the weights
   ppm_cases_points_counts$exposure <- raster::extract(exposure_raster,
                                                       cbind(ppm_cases_points_counts$x, ppm_cases_points_counts$y))
-  
+
   # If an exposure (population) is provided, change the weights to be scaled by population
   if(!is.null(exposure)){
     ppm_int_points_period <- get_int_points_exposure_weights(ppmx, ppm_cases_points_counts,
@@ -93,7 +96,7 @@ space_time_ppmify <- function(points,
   ppm_df$regression_weights[ppm_df$regression_weights == 0] <- 1
   
   # divide the exposure by the number of cases in each cell
-  ppm_df$weights <- ppm_df$weights/ppm_df$regression_weights
+  ppm_df$exposure <- ppm_df$exposure/ppm_df$regression_weights
   
   # Get covariate values at data and prediction points
   ##### AT data points
@@ -124,15 +127,15 @@ space_time_ppmify <- function(points,
   if(prediction_frame==FALSE){
     return(list(ppm_df = ppm_df))
   }else{
-    
+
     ##### At prediction points
-    pred_point_coords <- coordinates(reference_raster)[which(!is.na(reference_raster[])),]
+    pred_point_coords <- coordinates(exposure_raster)[which(!is.na(exposure_raster[])),]
     pred_points_sf <- st_as_sf(SpatialPoints(pred_point_coords))
     input_data_list_pred_points <- list(
       points = geojson_list(pred_points_sf),
       layer_names = layer_name
     )
-    
+
     response_pred_points <-
       httr::POST(
         url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",

@@ -17,7 +17,6 @@ get_int_points_exposure_weights <- function(ppmx, ppm_cases_points_counts, expos
   # First remove any pixels with cases as you need to estimate population in pixels without cases
   dd <- deldir::deldir(ppm_int_points$x, ppm_int_points$y)
   tiles <- deldir::tile.list(dd)
-
   
   polys <- vector(mode = "list", length = length(tiles))
   for (i in seq(along = polys)) {
@@ -44,7 +43,9 @@ get_int_points_exposure_weights <- function(ppmx, ppm_cases_points_counts, expos
   }
   
   # Remove any points with 0 offset
+  if(length(which(ppm_int_points_period$exposure <= 0))>0){
   ppm_int_points_period <- ppm_int_points_period[-which(ppm_int_points_period$exposure <= 0),]
+  }
   
   return(ppm_int_points_period)
 }  

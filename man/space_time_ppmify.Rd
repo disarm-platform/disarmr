@@ -6,7 +6,7 @@
 \usage{
 space_time_ppmify(points, layer_name = NULL, exposure, resolution = 1,
   date_start_end, num_periods = 1, prediction_exposure = exposure,
-  density, prediction_frame = FALSE)
+  approx_num_int_points = 10000, prediction_frame = FALSE)
 }
 \arguments{
 \item{points}{sfc object with a `Date` associated with the point in yyyy-mm-dd format}
@@ -34,10 +34,10 @@ This may be different to `exposure` if `points` arose from a different populatio
 to that you wish to predict to. Automatically resampled to the same 
 resolution as `exposure`. Defaults to `exposure`.}
 
-\item{density}{Required. Density of quadrature points to generate (points / square km)}
-
 \item{prediction_frame}{Logical. Whether the function should also return a 
 data frame required for prediction (i.e. raster cells)? Defaults to FALSE.}
+
+\item{density}{Required. Density of quadrature points to generate (points / square km)}
 }
 \value{
 A data.frame object with the following fields:
