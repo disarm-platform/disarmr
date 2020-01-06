@@ -48,7 +48,7 @@ space_time_ppmify <- function(points,
                               prediction_exposure = exposure,
                               approx_num_int_points = 10000,
                               prediction_frame=FALSE) {
-
+browser()
   # run function and catch result
   exposure_raster <- exposure
   prediction_exposure_raster <- prediction_exposure

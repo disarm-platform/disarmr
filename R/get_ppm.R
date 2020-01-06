@@ -3,7 +3,7 @@ get_ppm <- function (coords,
                      area = NULL,
                      approx_num_int_points = 1000){
   
-  cell_area <- prod(res(exposure))
+  cell_area <- prod(res(area))
   prop_data_cells <- sum(!is.na(area[])) / ncell(area)
   data_area <- ncell(area) * cell_area * prop_data_cells
   
