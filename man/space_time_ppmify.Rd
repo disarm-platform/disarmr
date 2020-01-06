@@ -4,9 +4,10 @@
 \alias{space_time_ppmify}
 \title{The space_time_ppmify function}
 \usage{
-space_time_ppmify(points, layer_name = NULL, exposure, resolution = 1,
-  date_start_end, num_periods = 1, prediction_exposure = exposure,
-  approx_num_int_points = 10000, prediction_frame = FALSE)
+space_time_ppmify(points, layer_name = NULL, covariates = NULL,
+  exposure, resolution = 1, date_start_end, num_periods = 1,
+  prediction_exposure = exposure, approx_num_int_points = 10000,
+  prediction_frame = FALSE)
 }
 \arguments{
 \item{points}{sfc object with a `Date` associated with the point in yyyy-mm-dd format}
@@ -15,6 +16,8 @@ space_time_ppmify(points, layer_name = NULL, exposure, resolution = 1,
 Currently only uses static covariates. 
 See [here under 'Layer names'](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md) 
 for a list of options. If none provided, spatial only model is assumed.}
+
+\item{covariates}{a rasterLayer or rasterStack of additional covariates to include}
 
 \item{exposure}{rasterLayer of exposure (to be used as offset). Required. 
 Raster representing the population over which points arose. Currently 

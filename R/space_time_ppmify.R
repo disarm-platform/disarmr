@@ -8,6 +8,7 @@
 #' Currently only uses static covariates. 
 #' See [here under 'Layer names'](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md) 
 #' for a list of options. If none provided, spatial only model is assumed. 
+#' @param covariates a rasterLayer or rasterStack of additional covariates to include
 #' @param exposure rasterLayer of exposure (to be used as offset). Required. 
 #' Raster representing the population over which points arose. Currently 
 #' only accepts a single raster which is used across all time periods.
@@ -34,11 +35,12 @@
 #'   \item regression_weights - Number of `outcomes` per space-time cell, to be used as a regression weight
 #' }
 #' @export
-#' @import httr raster sf sp 
+#' @import httr raster sf sp geojsonio
 #' @examples 
 
 space_time_ppmify <- function(points,
-                              layer_name=NULL,
+                              layer_name = NULL,
+                              covariates = NULL,
                               exposure,
                               resolution=1,
                               date_start_end, 
@@ -97,32 +99,37 @@ space_time_ppmify <- function(points,
   
   # divide the exposure by the number of cases in each cell
   ppm_df$exposure <- ppm_df$exposure/ppm_df$regression_weights
-  
+
   # Get covariate values at data and prediction points
-  ##### AT data points
-  ppm_df_sf <- st_as_sf(SpatialPoints(ppm_df[,c("x", "y")]))
-  input_data_list <- list(
-    points = geojson_list(ppm_df_sf),
-    layer_names = layer_name,
-    resolution = resolution
-  )
+  if(!is.null(layer_name)){
   
-  response <-
-    httr::POST(
-      url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
-      body = as.json(input_data_list),
-      content_type_json(),
-      timeout(300)
-    )
+        ##### AT data points
+        ppm_df_sf <- st_as_sf(SpatialPoints(ppm_df[,c("x", "y")]))
+        input_data_list <- list(
+          points = geojsonio::geojson_list(ppm_df_sf),
+          layer_names = layer_name,
+          resolution = resolution
+        )
+        
+        response <-
+          httr::POST(
+            url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
+            body = geojsonio::as.json(input_data_list),
+            content_type_json(),
+            timeout(300)
+          )
+        
+        response_content <- content(response)
+        ppm_df_sf_with_covar <- st_read(geojsonio::as.json(response_content$result), quiet = TRUE)
+        
+        # Merge with ppm_df 
+        ppm_df <- cbind(ppm_df, as.data.frame(ppm_df_sf_with_covar))
+        ppm_df <- subset(ppm_df, select=-c(points, weights, geometry))
+  }else{
+    # Drop unnessecary columns
+    ppm_df <- subset(ppm_df, select=-c(points, weights))
+  }
   
-  response_content <- content(response)
-  ppm_df_sf_with_covar <- st_read(as.json(response_content$result), quiet = TRUE)
-  
-  # Merge with ppm_df 
-  ppm_df <- cbind(ppm_df, as.data.frame(ppm_df_sf_with_covar))
-  
-  # Drop unnessecary columns
-  ppm_df <- subset(ppm_df, select=-c(weights, points, geometry))
   
   if(prediction_frame==FALSE){
     return(list(ppm_df = ppm_df))
@@ -130,29 +137,53 @@ space_time_ppmify <- function(points,
 
     ##### At prediction points
     pred_point_coords <- coordinates(exposure_raster)[which(!is.na(exposure_raster[])),]
-    pred_points_sf <- st_as_sf(SpatialPoints(pred_point_coords))
-    input_data_list_pred_points <- list(
-      points = geojson_list(pred_points_sf),
-      layer_names = layer_name
-    )
-
-    response_pred_points <-
-      httr::POST(
-        url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
-        body = as.json(input_data_list_pred_points),
-        content_type_json(),
-        timeout(300)
-      )
     
-    response_content_pred_points <- content(response_pred_points)
-    pred_points_with_covar <- st_read(as.json(response_content_pred_points$result), quiet = TRUE)
-    ppm_df_pred <- cbind(pred_points_with_covar, pred_point_coords)
+    if(!is.null(layer_name)){
+      
+          pred_points_sf <- st_as_sf(SpatialPoints(pred_point_coords))
+          input_data_list_pred_points <- list(
+            points = geojsonio::geojson_list(pred_points_sf),
+            layer_names = layer_name
+          )
+      
+          response_pred_points <-
+            httr::POST(
+              url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
+              body = geojsonio::as.json(input_data_list_pred_points),
+              content_type_json(),
+              timeout(300)
+            )
+          
+          response_content_pred_points <- content(response_pred_points)
+          pred_points_with_covar <- st_read(geojsonio::as.json(response_content_pred_points$result), quiet = TRUE)
+          ppm_df_pred <- cbind(pred_points_with_covar, pred_point_coords)
+          
+          # Drop unnessecary columns
+          ppm_df_pred <- as.data.frame(ppm_df_pred)
+          ppm_df_pred <- subset(ppm_df_pred, select=-c(geometry))
+          
+    }else{
+      ppm_df_pred <- as.data.frame(pred_point_coords)
+    }
+    
     ppm_df_pred$exposure <- prediction_exposure_raster[which(!is.na(exposure_raster[]))]
     
-    # Drop unnessecary columns
-    ppm_df_pred <- as.data.frame(ppm_df_pred)
-    ppm_df_pred <- subset(ppm_df_pred, select=-c(geometry))
+    # Add on any supplied covariates
+    if(!is.null(covariates)){
+      
+      covariates <- resample(covariates, reference_raster)
+      extracted_covar <- data.frame(extract(covariates, ppm_df[,c("x", "y")]))
+      names(extracted_covar) <- names(covariates)
+      ppm_df <- cbind(ppm_df, extracted_covar)
+      
+      if(exists('ppm_df_pred')){
+        extracted_covar_pred <- data.frame(extract(covariates, ppm_df_pred[,c("x", "y")]))
+        names(extracted_covar_pred) <- names(covariates)
+        ppm_df_pred <- cbind(ppm_df_pred, extracted_covar_pred)
+      }
+    }
     
+    # Package up
     return(list(ppm_df = ppm_df,
                 ppm_df_pred = ppm_df_pred))
   }

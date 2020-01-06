@@ -29,6 +29,8 @@ get_int_points_exposure_weights <- function(ppmx, ppm_cases_points_counts, expos
   ppm_int_points_period <- NULL
   for(j in 1:num_periods){
     exposure_raster_non_case_pixels <- exposure_raster
+    
+    # Remove any 'case' pixels
     ppm_case_points_coords <- ppm_cases_points_counts[ppm_cases_points_counts$period == j, c("x", "y")]
     exposure_raster_non_case_pixels[raster::cellFromXY(exposure_raster_non_case_pixels,
                                                     ppm_case_points_coords)] <- NA
