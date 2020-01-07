@@ -5,15 +5,16 @@
 #' @import leaflet sf sp raster wesanderson
 #' @export
 
-quick_map <- function(plot_data, value_field, colors=NULL, circle_size = 3){
+quick_map <- function(plot_data, value_field=NULL, colors=NULL, circle_size = 3, 
+                      raster_legend_title = NULL){
   
   if(is.null(plot_data)){
     stop("'plot_data' not defined")
   }
   
-  if(is.null(value_field)){
-    stop("'value_field' not defined")
-  }
+  # if(is.null(value_field)){
+  #   stop("'value_field' not defined")
+  # }
   
   # Define basemap
   basemap <- leaflet() %>% addProviderTiles("CartoDB.Positron") 
@@ -25,10 +26,16 @@ quick_map <- function(plot_data, value_field, colors=NULL, circle_size = 3){
   # Figure out whether points, polys or raster
   if(class(plot_data)[1] == "RasterLayer"){
     
+    if(!is.null(raster_legend_title)){
+      title <- raster_legend_title
+    }else{
+      title <- names(plot_data)
+    }
+    
     col_pal <- colorNumeric(colors,
                  values(plot_data), na.color = NA)
     map <- basemap %>% addRasterImage(plot_data, col_pal, opacity = 0.7) %>%
-      addLegend(pal=col_pal, values=values(plot_data), title = names(plot_data))
+      addLegend(pal=col_pal, values=values(plot_data), title = title)
   }
   
   if(class(plot_data)[1] == "SpatialPolygonsDataFrame" |
