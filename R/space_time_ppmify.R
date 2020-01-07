@@ -48,7 +48,7 @@ space_time_ppmify <- function(points,
                               prediction_exposure = exposure,
                               approx_num_int_points = 10000,
                               prediction_frame=FALSE) {
-browser()
+
   # run function and catch result
   exposure_raster <- exposure
   prediction_exposure_raster <- prediction_exposure
@@ -63,7 +63,7 @@ browser()
   exposure_raster <- exposure_raster * mult_factor
   
     
-  prediction_exposure_raster <- raster::resample(prediction_exposure_raster, exposure_raster)
+  prediction_exposure_raster <- raster::resample(prediction_exposure_raster, exposure_raster) # TODO - ensure this sums to correct 
   #reference_raster <- exposure_raster # TODO - allow this to be controlled as parameter in function when exposure not provided using boundary and resolution
   points_coords <- st_coordinates(points)
 
