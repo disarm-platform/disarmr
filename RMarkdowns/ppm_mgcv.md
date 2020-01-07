@@ -4,7 +4,7 @@ We are going to fit a point process model using Generalized Additive Modeling vi
 First let's load the gun crime data for the USA in 2015 and corresponding population raster (WorldPop) from the DiSARM package
 
 
-```
+```r
 library(DiSARM)
 library(raster)
 library(mgcv)
@@ -14,14 +14,14 @@ data('USA_pop_2015')
 ```
 
 We can generate a map of these incidents
-```
+```r
 quick_map(gun_crime_sf, 'num_killed')
 ```
 
-![](RMarkdowns/gun_crime_mgcv_files/figure-gfm/map_crimes-1.png)<!-- -->
+![](gun_crime_mgcv_files/figure-gfm/map_crimes-1.png)<!-- -->
 
 For simplicity, let's just work with the 48 contiguous states
-```
+```r
 # Get USA data
 states <- raster::getData("GADM", country="USA", level=1)
 states_49 <- subset(states, !(NAME_1 %in% c("Alaska", "Hawaii")))
@@ -29,7 +29,7 @@ USA_pop_2015 <- crop(USA_pop_2015, states_49)
 ```
 
 Now, to coin a phrase from Nick Golding's ppmify package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling. 
-```
+```r
 ppm_df <- space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
                 resolution=5,
@@ -40,7 +40,7 @@ ppm_df <- space_time_ppmify(points = gun_crime_sf,
 ```
 
 Now let's fit a model using MGCV using a spatial-only model
-```
+```r
 ppm_df$ppm_df <- subset(ppm_df$ppm_df, exposure!=0)
 gam_mod <- mgcv::gam(outcome ~ s(x, y, k=500),
                offset=log(exposure),
@@ -51,7 +51,7 @@ gam_mod <- mgcv::gam(outcome ~ s(x, y, k=500),
 ```
 
 Predict 
-```
+```r
 pred_df_1 <- ppm_df$ppm_df_pred
 
 # Resample population to the resolution specified in `space_time_ppmify`
@@ -74,7 +74,7 @@ nrow(gun_crime_sf)
     ## [1] 11609
 
 Map predicted rate
-```
+```r
 pred_raster <- cases_raster <- exposure_resamp
 pred_raster[!is.na(exposure_resamp[])] <- predictions
 cases_raster[!is.na(exposure_resamp[])] <- predicted_num
@@ -88,4 +88,4 @@ leaflet() %>% addProviderTiles("CartoDB.Positron") %>%
   addRasterImage(pred_raster_inc, col = colors, opacity = 0.8) %>% 
   addLegend(title = "Gun crimes/1000", pal = colors, values = values(pred_raster_inc))
 ```
-![](RMarkdowns/gun_crime_mgcv_files/figure-gfm/pred_inc.png)<!-- -->
+![](gun_crime_mgcv_files/figure-gfm/pred_inc.png)<!-- -->
