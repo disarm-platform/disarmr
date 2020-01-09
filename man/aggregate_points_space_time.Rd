@@ -4,7 +4,7 @@
 \alias{aggregate_points_space_time}
 \title{The aggregate_points_space_time function}
 \usage{
-aggregate_points_space_time(points, ppmx, num_periods, date_start_end,
+aggregate_points_space_time(points, ppmx, periods, date_start_end,
   reference_raster)
 }
 \description{

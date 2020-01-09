@@ -5,7 +5,7 @@
 \title{The space_time_ppmify function}
 \usage{
 space_time_ppmify(points, covariates = NULL, exposure, date_start_end,
-  num_periods = 1, prediction_exposure = exposure,
+  periods = date_start_end, prediction_exposure = exposure,
   approx_num_int_points = 10000, prediction_stack = FALSE)
 }
 \arguments{
@@ -21,9 +21,8 @@ resolution and extent as `exposure`.}
 \item{date_start_end}{Required. Vector of 2 values representing the start and end 
 times over which points were observed in yyyy-mm-dd format}
 
-\item{num_periods}{Number of time periods over which to aggregate points, 
-where 1 considers all points in a single time period 
-(equivalent to assuming a spatial only model). Defaults to 1.}
+\item{periods}{Vector of date breaks in yyyy-mm-dd format. Defaults to `date_start_end` - i.e. 
+assumes a single time period (spatial only)}
 
 \item{prediction_exposure}{Optional rasterLayer of exposure to be used for prediction. 
 This may be different to `exposure` if `points` arose from a different population 

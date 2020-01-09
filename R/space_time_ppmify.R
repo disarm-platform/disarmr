@@ -12,9 +12,8 @@
 #' resolution and extent as `exposure`.
 #' @param date_start_end Required. Vector of 2 values representing the start and end 
 #' times over which points were observed in yyyy-mm-dd format
-#' @param num_periods Number of time periods over which to aggregate points, 
-#' where 1 considers all points in a single time period 
-#' (equivalent to assuming a spatial only model). Defaults to 1.
+#' @param periods Vector of date breaks in yyyy-mm-dd format. Defaults to `date_start_end` - i.e. 
+#' assumes a single time period (spatial only)
 #' @param prediction_exposure Optional rasterLayer of exposure to be used for prediction. 
 #' This may be different to `exposure` if `points` arose from a different population 
 #' to that you wish to predict to. Should be at the same resolution/extent as `exposure`. Defaults to `exposure`. 
@@ -38,7 +37,7 @@ space_time_ppmify <- function(points,
                               covariates = NULL,
                               exposure,
                               date_start_end, 
-                              num_periods=1,
+                              periods=date_start_end,
                               prediction_exposure = exposure,
                               approx_num_int_points = 10000,
                               prediction_stack=FALSE) {
@@ -46,16 +45,8 @@ space_time_ppmify <- function(points,
   # run function and catch result
   exposure_raster <- exposure
   prediction_exposure_raster <- prediction_exposure
-  # 
-  # # Resample to rough resolution in km
-  # reference_raster <- raster(extent(exposure), res = resolution/111)
-  # exposure_raster <- resample(exposure, reference_raster)
-  # 
-  # # MAke sure the resampled exposure raster sums correctly
-  # exposure_raster[which(exposure_raster[]<0)] <- 0
-  # mult_factor <- cellStats(exposure, sum) / cellStats(exposure_raster, sum)
-  # exposure_raster <- exposure_raster * mult_factor
-  
+  num_periods <- length(periods) - 1
+
   # Check exposure/prediction_exposure rasters
   if(!compareRaster(prediction_exposure_raster, exposure_raster)){
     stop(paste('prediction_exposure_raster and exposure_raster are not the same resolution/extent'))
@@ -72,15 +63,15 @@ space_time_ppmify <- function(points,
                   approx_num_int_points = floor(approx_num_int_points / num_periods))
 
   # Aggregate points in space/time (i.e. aggregate points in same pixel)
-  ppm_cases_points_counts <- aggregate_points_space_time(points, ppmx, num_periods, date_start_end, reference_raster)
+  ppm_cases_points_counts <- aggregate_points_space_time(points, ppmx, periods, date_start_end, reference_raster)
   
   # Make these population extractions the weights
   ppm_cases_points_counts$exposure <- raster::extract(exposure_raster,
                                                       cbind(ppm_cases_points_counts$x, ppm_cases_points_counts$y))
   
   # If any points were located in a pixel with 0 population, remove and notify
-  if(sum(ppm_cases_points_counts$exposure==0)>0){
-    warning(paste(sum(ppm_cases_points_counts$exposure==0), 
+  if(sum(ppm_cases_points_counts$exposure==0, na.rm=T)>0){
+    warning(paste(sum(ppm_cases_points_counts$exposure==0, na.rm=T), 
                   'points located in pixels with population of zero or NA were removed'))
     ppm_cases_points_counts <- subset(ppm_cases_points_counts, exposure!=0)
   }
@@ -106,37 +97,11 @@ space_time_ppmify <- function(points,
   # divide the exposure by the number of cases in each cell
   ppm_df$exposure <- ppm_df$exposure/ppm_df$regression_weights
 
-  # Get covariate values at data and prediction points
-  # if(!is.null(layer_name)){
-  # 
-  #       ##### AT data points
-  #       ppm_df_sf <- st_as_sf(SpatialPoints(ppm_df[,c("x", "y")]))
-  #       input_data_list <- list(
-  #         points = geojsonio::geojson_list(ppm_df_sf),
-  #         layer_names = layer_name,
-  #         resolution = resolution
-  #       )
-  #       
-  #       response <-
-  #         httr::POST(
-  #           url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
-  #           body = geojsonio::as.json(input_data_list),
-  #           content_type_json(),
-  #           timeout(300)
-  #         )
-  #       
-  #       response_content <- content(response)
-  #       ppm_df_sf_with_covar <- st_read(geojsonio::as.json(response_content$result), quiet = TRUE)
-  #       
-  #       # Merge with ppm_df 
-  #       ppm_df <- cbind(ppm_df, as.data.frame(ppm_df_sf_with_covar))
-  #       ppm_df <- subset(ppm_df, select=-c(points, weights, geometry))
-  # }else{
-    # Drop unnessecary columns
-    ppm_df <- subset(ppm_df, select=-c(points, weights))
-  #}
-    # Add on any supplied covariates
-    if(!is.null(covariates)){
+  # Drop unnessecary columns
+  ppm_df <- subset(ppm_df, select=-c(points, weights))
+    
+  # Add on any supplied covariates
+  if(!is.null(covariates)){
       
       covariates <- resample(covariates, reference_raster)
       extracted_covar <- data.frame(extract(covariates, ppm_df[,c("x", "y")]))
@@ -147,6 +112,7 @@ space_time_ppmify <- function(points,
   if(prediction_stack==FALSE){
     return(list(ppm_df = ppm_df))
   }else{
+    
     # Create an empty raster with the same extent and resolution as the bioclimatic layers
     x_raster <- y_raster <- reference_raster
     
@@ -171,57 +137,4 @@ space_time_ppmify <- function(points,
                 prediction_stack = pred_stack))
   }
 }
-  # }else{
-  # 
-  #   ##### At prediction points
-  #   pred_point_coords <- coordinates(exposure_raster)[which(!is.na(exposure_raster[])),]
-    
-    # if(!is.null(layer_name)){
-    #   
-    #       pred_points_sf <- st_as_sf(SpatialPoints(pred_point_coords))
-    #       input_data_list_pred_points <- list(
-    #         points = geojsonio::geojson_list(pred_points_sf),
-    #         layer_names = layer_name
-    #       )
-    #   
-    #       response_pred_points <-
-    #         httr::POST(
-    #           url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
-    #           body = geojsonio::as.json(input_data_list_pred_points),
-    #           content_type_json(),
-    #           timeout(300)
-    #         )
-    #       
-    #       response_content_pred_points <- content(response_pred_points)
-    #       pred_points_with_covar <- st_read(geojsonio::as.json(response_content_pred_points$result), quiet = TRUE)
-    #       ppm_df_pred <- cbind(pred_points_with_covar, pred_point_coords)
-    #       
-    #       # Drop unnessecary columns
-    #       ppm_df_pred <- as.data.frame(ppm_df_pred)
-    #       ppm_df_pred <- subset(ppm_df_pred, select=-c(geometry))
-    #       
-    # }else{
-    #   ppm_df_pred <- as.data.frame(pred_point_coords)
-    # #}
-    # 
-    # ppm_df_pred$exposure <- prediction_exposure_raster[which(!is.na(exposure_raster[]))]
-    # 
-    # # Add on any supplied covariates
-    # if(!is.null(covariates)){
-    #   
-    #   covariates <- resample(covariates, reference_raster)
-    #   extracted_covar <- data.frame(extract(covariates, ppm_df[,c("x", "y")]))
-    #   names(extracted_covar) <- names(covariates)
-    #   ppm_df <- cbind(ppm_df, extracted_covar)
-      
-      # if(exists('ppm_df_pred')){
-      #   extracted_covar_pred <- data.frame(extract(covariates, ppm_df_pred[,c("x", "y")]))
-      #   names(extracted_covar_pred) <- names(covariates)
-      #   ppm_df_pred <- cbind(ppm_df_pred, extracted_covar_pred)
-      # }
-  #   }
-  #   
-  #   # Package up
-  #   return(list(ppm_df = ppm_df)
-  # }
-#}
+

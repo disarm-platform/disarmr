@@ -67,23 +67,24 @@ get_int_points_exposure_weights <- function(ppmx, ppm_cases_points_counts, expos
 # Deal with case points
 # First aggregate any cases occuring in the same pixel in the same month
 # # loop through each month and identify any cases in the same pixel
-aggregate_points_space_time <- function(points, ppmx, num_periods, date_start_end, reference_raster){
+aggregate_points_space_time <- function(points, ppmx, periods, date_start_end, reference_raster){
 
+      num_periods <- length(periods) - 1
       ppm_cases_points <- ppmx[ppmx$points==1,]
       ppm_cases_points_counts <- ppm_cases_points[FALSE,]
       
       # Define date breaks
       dates <- seq(ymd(date_start_end[1]), ymd(date_start_end[2]), 1)
-      if(num_periods > 1){
-      date_breaks <- c(levels(cut.Date(dates, num_periods, right=TRUE, include.lowest = TRUE)),
-                       date_start_end[2])
-      }else{
-        date_breaks <- date_start_end
-      }
+      # if(num_periods > 1){
+      # date_breaks <- c(levels(cut.Date(dates, periods, right=TRUE, include.lowest = TRUE)),
+      #                  date_start_end[2])
+      # }else{
+      #   date_breaks <- date_start_end
+      # }
 
       for(i in 1:num_periods){
         
-        cases_model_period <- as.numeric(cut.Date(ymd(points$date), ymd(date_breaks), include.lowest = TRUE))
+        cases_model_period <- as.numeric(cut.Date(ymd(points$date), ymd(periods), include.lowest = TRUE))
         cases_period <- ppm_cases_points[cases_model_period==i,]
         
         if(nrow(cases_period)>0){
