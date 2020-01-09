@@ -83,7 +83,7 @@ aggregate_points_space_time <- function(points, ppmx, num_periods, date_start_en
 
       for(i in 1:num_periods){
         
-        cases_model_period <- as.numeric(cut.Date(ymd(points$date), ymd(date_breaks)))
+        cases_model_period <- as.numeric(cut.Date(ymd(points$date), ymd(date_breaks), include.lowest = TRUE))
         cases_period <- ppm_cases_points[cases_model_period==i,]
         
         if(nrow(cases_period)>0){

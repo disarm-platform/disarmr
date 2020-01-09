@@ -4,26 +4,19 @@
 \alias{space_time_ppmify}
 \title{The space_time_ppmify function}
 \usage{
-space_time_ppmify(points, layer_name = NULL, covariates = NULL,
-  exposure, resolution = 1, date_start_end, num_periods = 1,
-  prediction_exposure = exposure, approx_num_int_points = 10000,
-  prediction_frame = FALSE)
+space_time_ppmify(points, covariates = NULL, exposure, date_start_end,
+  num_periods = 1, prediction_exposure = exposure,
+  approx_num_int_points = 10000, prediction_stack = FALSE)
 }
 \arguments{
-\item{points}{sfc object with a `Date` associated with the point in yyyy-mm-dd format}
-
-\item{layer_name}{Optional. Names of the bioclimatic/environmental layers to use as covariates. 
-Currently only uses static covariates. 
-See [here under 'Layer names'](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md) 
-for a list of options. If none provided, spatial only model is assumed.}
-
-\item{covariates}{a rasterLayer or rasterStack of additional covariates to include}
+\item{points}{sfc object with a `date` associated with the point in yyyy-mm-dd format}
 
 \item{exposure}{rasterLayer of exposure (to be used as offset). Required. 
 Raster representing the population over which points arose. Currently 
-only accepts a single raster which is used across all time periods.}
-
-\item{resolution}{Resolution in km2 that covariates and offset should be resampled to (>= 1km2). Defaults to 1.}
+only accepts a single raster which is used across all time periods.
+#' @param covariates Optional rasterLayer or rasterStack of additional covariates to include. 
+Should be at the same resolution/extent as `exposure`. If not, will be resampled to the same 
+resolution and extent as `exposure`.}
 
 \item{date_start_end}{Required. Vector of 2 values representing the start and end 
 times over which points were observed in yyyy-mm-dd format}
@@ -34,13 +27,12 @@ where 1 considers all points in a single time period
 
 \item{prediction_exposure}{Optional rasterLayer of exposure to be used for prediction. 
 This may be different to `exposure` if `points` arose from a different population 
-to that you wish to predict to. Automatically resampled to the same 
-resolution as `exposure`. Defaults to `exposure`.}
+to that you wish to predict to. Should be at the same resolution/extent as `exposure`. Defaults to `exposure`.}
 
-\item{prediction_frame}{Logical. Whether the function should also return a 
-data frame required for prediction (i.e. raster cells)? Defaults to FALSE.}
+\item{approx_num_int_points}{Approximate number of integration points to use. Defaults to 10,000.}
 
-\item{density}{Required. Density of quadrature points to generate (points / square km)}
+\item{prediction_stack}{Logical. Whether the function should also return a 
+rasterStack of layers required for prediction. Defaults to FALSE.}
 }
 \value{
 A data.frame object with the following fields:
