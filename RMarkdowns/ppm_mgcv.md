@@ -24,20 +24,11 @@ quick_map(gun_crime_sf, 'num_killed')
 
 ![](gun_crime_mgcv_files/figure-gfm/map_crimes-1.png)<!-- -->
 
-For simplicity, let's just work with the 48 contiguous states
-```r
-# Get USA data
-states <- raster::getData("GADM", country="USA", level=1)
-states_49 <- subset(states, !(NAME_1 %in% c("Alaska", "Hawaii")))
-USA_pop_2015 <- crop(USA_pop_2015, states_49)
-```
-
 Now, to coin a phrase from Nick Golding's ppmify package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling. 
 ```r
 ppm_df <- space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
-                date_start_end=c("2015-01-01", "2015-12-31"),
-                num_periods=1,
+                date_start_end=c("2015-01-01", "2015-12-31")
                 prediction_stack=TRUE)
 ```
 
@@ -62,7 +53,7 @@ cellStats(predicted_num, sum)
 nrow(gun_crime_sf)
 ```
 
-    ## [1] 11601.94
+    ## [1] 11434.85
     ## [1] 11550
 
 Map predicted rate
@@ -91,9 +82,9 @@ scale_x_continuous(name="Observed numbers of incidents") +
 # And map
 case_num_pal <- colorBin(topo.colors(5), c(0,600), bins = c(0, 1, 10, 100, 600))
 par(mfrow=c(2,1))
-plot(hexbin_stats, col = case_num_pal(hexbin_stats$observed), main = "Observed counts")
+plot(hexbin_stats, col = case_num_pal(hexbin_stats$observed), main = "Observed counts", asp=1)
 legend("bottomright", inset=0, title="Number of incidents",
    c("0-1","1-10","10-100", "100-600"), fill=case_num_pal(c(0.5, 1.5, 10.5, 100.5)), horiz=FALSE, cex=0.8)
-plot(hexbin_stats, col = case_num_pal(hexbin_stats$stat), main = "Fitted counts")
+plot(hexbin_stats, col = case_num_pal(hexbin_stats$stat), main = "Fitted counts", asp=1)
 ```
 ![](gun_crime_mgcv_files/figure-gfm/observed_fitted_hexbin.png)<!-- -->
