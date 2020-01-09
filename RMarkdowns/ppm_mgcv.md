@@ -36,16 +36,13 @@ Now, to coin a phrase from Nick Golding's ppmify package, let's ppmify our data 
 ```r
 ppm_df <- space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
-                resolution=5,
                 date_start_end=c("2015-01-01", "2015-12-31"),
                 num_periods=1,
-                approx_num_int_points = 10000,
-                prediction_frame=TRUE)
+                prediction_stack=TRUE)
 ```
 
 Now let's fit a model using MGCV using a spatial-only model
 ```r
-ppm_df$ppm_df <- subset(ppm_df$ppm_df, exposure!=0)
 gam_mod <- mgcv::gam(outcome ~ s(x, y, k=500),
                offset=log(exposure),
                weights = regression_weights,
@@ -56,54 +53,40 @@ gam_mod <- mgcv::gam(outcome ~ s(x, y, k=500),
 
 Predict 
 ```r
-pred_df_1 <- ppm_df$ppm_df_pred
-
-# Resample population to the resolution specified in `space_time_ppmify`
-reference_raster <- raster(extent(USA_pop_2015), res = 5/111)
-exposure_resamp <- resample(USA_pop_2015, reference_raster)
-exposure_resamp[which(exposure_resamp[]<0)] <- 0
-mult_factor <- cellStats(USA_pop_2015, sum) / cellStats(exposure_resamp, sum)
-exposure_resamp <- exposure_resamp * mult_factor
-
 # Predict
-predictions <- predict(gam_mod, pred_df_1)
-predicted_num <- exp(predictions + log(exposure_resamp[!is.na(exposure_resamp[])]))
+predicted_log_rate <- predict(ppm_df$prediction_stack, gam_mod)
+predicted_num <- exp(predicted_log_rate + log(USA_pop_2015))
 
 # Check predicted numbers against observed
-sum(predicted_num)
+cellStats(predicted_num, sum)
 nrow(gun_crime_sf)
 ```
 
-    ## [1] 11597.09
-    ## [1] 11609
+    ## [1] 11601.94
+    ## [1] 11550
 
 Map predicted rate
 ```r
-pred_raster <- cases_raster <- exposure_resamp
-pred_raster[!is.na(exposure_resamp[])] <- predictions
-cases_raster[!is.na(exposure_resamp[])] <- predicted_num
-
-crs(pred_raster) <- crs(states_49)
-pred_raster_inc <- exp(mask(pred_raster, states_49))*1000
+pred_raster_inc <- exp(predicted_log_rate)*1000
 quick_map(pred_raster_inc, raster_legend_title="Gun crimes/1000")
 ```
 ![](gun_crime_mgcv_files/figure-gfm/pred_inc.png)<!-- -->
 
 Using the MapPalettes package we can compare predicted versus observed counts using hexbins
 ```r
-hexbin_stats <- hexbin_raster(cases_raster, 500, function(x){sum(x,na.rm=T)})
+hexbin_stats <- hexbin_raster(predicted_num, 500, function(x){sum(x,na.rm=T)})
 intersects <- st_intersects(gun_crime_sf, st_as_sf(hexbin_stats))
 intersects_table <- table(unlist(intersects))
 hexbin_stats$observed <- 0
 hexbin_stats$observed[as.numeric(names(intersects_table))] <- intersects_table
 
-# Generate scatter plot
-plot(hexbin_stats$observed, hexbin_stats$stat)
+# Now plot
 ggplot() + geom_point(aes(hexbin_stats$observed, hexbin_stats$stat)) +
 scale_x_continuous(name="Observed numbers of incidents") + 
   scale_y_continuous(name="Predicted (fitted) numbers of incidents")
 ```
 ![](gun_crime_mgcv_files/figure-gfm/observed_fitted.png)<!-- -->
+
 ```r
 # And map
 case_num_pal <- colorBin(topo.colors(5), c(0,600), bins = c(0, 1, 10, 100, 600))
