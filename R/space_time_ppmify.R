@@ -122,15 +122,15 @@ space_time_ppmify <- function(points,
     
     # Now create a final prediction stack of the 4 variables we need
     if(!is.null(covariates)){
-        pred_stack <- stack(covariates,
+        pred_stack <- raster::stack(covariates,
                             x_raster,
                             y_raster)
-        pred_stack <- mask(pred_stack, exposure_raster)
+        pred_stack <- raster::mask(pred_stack, exposure_raster)
         names(pred_stack) <- c(names(covariates), 'x', 'y')
     }else{
-        pred_stack <- stack(x_raster,
+        pred_stack <- raster::stack(x_raster,
                             y_raster)
-        pred_stack <- mask(pred_stack, exposure_raster)
+        pred_stack <- raster::mask(pred_stack, exposure_raster)
         names(pred_stack) <- c('x', 'y')
     }
     return(list(ppm_df = ppm_df,
