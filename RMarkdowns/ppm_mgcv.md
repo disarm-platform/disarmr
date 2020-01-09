@@ -28,7 +28,7 @@ Now, to coin a phrase from Nick Golding's ppmify package, let's ppmify our data 
 ```r
 ppm_df <- space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
-                date_start_end=c("2015-01-01", "2015-12-31")
+                date_start_end=c("2015-01-01", "2015-12-31"),
                 prediction_stack=TRUE)
 ```
 
