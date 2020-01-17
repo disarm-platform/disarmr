@@ -2,11 +2,7 @@
 % Please edit documentation in R/dist_to_sf_raster.R
 \name{dist_to_sf_raster}
 \alias{dist_to_sf_raster}
-\title{Function create raster of distance to an sf/sp object. Note that the
-function currently only calcualtes distances to coordinates/vertices of the 
-sf/sp object rather than distance to nearest section/line. 
-If this is a line or polygon object this could result in 
-some introduced error depending on the density of vertices}
+\title{Function create raster of distance to an sf/sp object.}
 \usage{
 dist_to_sf_raster(sf_obj, ref_raster)
 }
@@ -16,9 +12,7 @@ dist_to_sf_raster(sf_obj, ref_raster)
 \item{ref_raster}{a reference raster with the extent and resolution of}
 }
 \description{
-Function create raster of distance to an sf/sp object. Note that the
-function currently only calcualtes distances to coordinates/vertices of the 
-sf/sp object rather than distance to nearest section/line. 
-If this is a line or polygon object this could result in 
-some introduced error depending on the density of vertices
+Note that if a line/polygon sf object is provided, it is first rasterized to the 
+reference raster and distance to the raster centroid of the cell in which the 
+line passes through is used as the line coordinate.
 }

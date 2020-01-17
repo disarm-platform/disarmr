@@ -5,7 +5,7 @@
 #' line passes through is used as the line coordinate.
 #' @param sf_obj An sf or sp object to calculate distance to
 #' @param ref_raster a reference raster with the extent and resolution of
-#' @import sf sp raster RANN
+#' @import sf sp raster RANN velox
 #' @export
 dist_to_sf_raster <- function(sf_obj, ref_raster){
 
@@ -15,7 +15,9 @@ dist_to_sf_raster <- function(sf_obj, ref_raster){
   sf_obj <- st_transform(sf_obj, crs(ref_raster))
   
   if(st_geometry_type(sf_obj)[1] %in% c("MULTILINESTRING", "LINESTRING")){
-    sf_obj_raster <- rasterize(as(sf_obj, "Spatial"), ref_raster)
+    ref_raster_vel <- velox(ref_raster)
+    sf_obj_raster <- ref_raster_vel$rasterize(spdf=sf_obj, field = names(sf_obj)[1], background = NA)
+    sf_obj_raster <- ref_raster_vel$as.RasterLayer()
     sf_coords <- coordinates(sf_obj_raster)[!is.na(sf_obj_raster)[],]
   }else{ 
   sf_coords <- st_coordinates(sf_obj)
