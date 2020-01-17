@@ -1,7 +1,7 @@
 ## Fitting point process models to disease case data with `mgcv` (or whatever you want)
 We are going to fit a point process model using Generalized Additive Modeling via the `mgcv` package. 
 
-First let's load the gun crime data for the USA in 2015 and corresponding population raster (WorldPop) from the [DiSARM package](https://github.com/disarm-platform/disarm-r-package)
+First let's load the gun crime data for the USA in 2015 (from the [gun violence archive](https://www.gunviolencearchive.org/)) and corresponding population raster (WorldPop) from the [DiSARM package](https://github.com/disarm-platform/disarm-r-package)
 
 
 ```r
