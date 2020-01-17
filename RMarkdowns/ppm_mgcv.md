@@ -64,7 +64,7 @@ quick_map(pred_raster_inc, raster_legend_title="Gun crimes/1000")
 ```
 ![](gun_crime_mgcv_files/figure-gfm/pred_inc.png)<!-- -->
 
-Using the MapPalettes package we can compare predicted versus observed counts using hexbins
+Using the [MapPalettes](https://github.com/disarm-platform/MapPalettes) package we can compare predicted versus observed counts using hexbins
 ```r
 hexbin_stats <- MapPalettes::hexbin_raster(predicted_num, 500, function(x){sum(x,na.rm=T)})
 intersects <- st_intersects(gun_crime_sf, st_as_sf(hexbin_stats))
@@ -72,14 +72,6 @@ intersects_table <- table(unlist(intersects))
 hexbin_stats$observed <- 0
 hexbin_stats$observed[as.numeric(names(intersects_table))] <- intersects_table
 
-# Now plot
-ggplot() + geom_point(aes(hexbin_stats$observed, hexbin_stats$stat)) +
-scale_x_continuous(name="Observed numbers of incidents") + 
-  scale_y_continuous(name="Predicted (fitted) numbers of incidents")
-```
-![](gun_crime_mgcv_files/figure-gfm/observed_fitted.png)<!-- -->
-
-```r
 # And map
 case_num_pal <- colorBin(topo.colors(5), c(0,600), bins = c(0, 1, 10, 100, 600))
 par(mfrow=c(2,1))
@@ -89,6 +81,17 @@ legend("bottomright", inset=0, title="Number of incidents",
 plot(hexbin_stats, col = case_num_pal(hexbin_stats$stat), main = "Fitted counts", asp=1)
 ```
 ![](gun_crime_mgcv_files/figure-gfm/observed_fitted_hexbin.png)<!-- -->
+
+Now plot observed versus fitted
+```r
+ggplot() + geom_point(aes(hexbin_stats$observed, hexbin_stats$stat)) +
+scale_x_continuous(name="Observed numbers of incidents") + 
+  scale_y_continuous(name="Predicted (fitted) numbers of incidents")
+```
+![](gun_crime_mgcv_files/figure-gfm/observed_fitted.png)<!-- -->
+
+
+
 
 
 ## Space-time example
