@@ -29,14 +29,15 @@ Now, to coin a phrase from Nick Golding's ppmify package, let's ppmify our data 
 ppm_df <- space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
                 date_start_end=c("2015-01-01", "2015-12-31"),
+                approx_num_int_points = 5000,
                 prediction_stack=TRUE)
 ```
 
 Now let's fit a model using MGCV using a spatial-only model
 ```r
-gam_mod <- mgcv::gam(outcome ~ s(x, y, k=500),
+gam_mod <- mgcv::gam(outcome ~ s(x, y, k=250),
                offset=log(exposure),
-               weights = regression_weights,
+               #weights = regression_weights,
                data = ppm_df$ppm_df,
                method = "REML",
                family = "poisson")
@@ -88,3 +89,56 @@ legend("bottomright", inset=0, title="Number of incidents",
 plot(hexbin_stats, col = case_num_pal(hexbin_stats$stat), main = "Fitted counts", asp=1)
 ```
 ![](gun_crime_mgcv_files/figure-gfm/observed_fitted_hexbin.png)<!-- -->
+
+
+## Space-time example
+Let's model the data across months. We can fit a spatio-temporal model using a tensor product between a bivariate spatial smooth and a smooth on time. We'll bump up the number of integration points as these will be spread across the time periods. 
+```{r, ppmify}
+date_breaks <- seq(ymd("2015-01-01"), ymd("2016-01-01"), by = "month")
+ppm_df_st <- space_time_ppmify(points = gun_crime_sf,
+                exposure = USA_pop_2015,
+                periods = date_breaks,
+                approx_num_int_points = 25000,
+                date_start_end=c("2015-01-01", "2015-12-31"),
+                prediction_stack=TRUE)
+```
+
+Now let's fit a model using `mgcv`. We can make use of the `bam` function to speed things up slightly.
+```{r, fit_model}
+gam_mod_st <- mgcv::bam(outcome ~ te(x, y, period, bs=c('tp', 'cr'), k=c(150,10),d=c(2,1)),
+               offset=log(exposure),
+               weights = regression_weights,
+               data = ppm_df_st$ppm_df,
+               method = "REML",
+               family = "poisson")
+
+```
+
+Now we can predict for each month
+```{r}
+period_raster <- ppm_df$prediction_stack[[1]]
+predicted_rate_stack <- stack()
+
+# Loop through each time period and predict
+for(i in 1:(length(date_breaks)-1)){
+  period_raster[] <- i
+  names(period_raster) <- 'period'
+  pred_stack <- stack(ppm_df$prediction_stack[[c('x', 'y')]], period_raster)
+  predicted_rate_stack <- stack(predicted_rate_stack,
+                             predict(pred_stack, bam_mod_st))
+}
+
+# Plot
+rasterVis::levelplot(exp(predicted_rate_stack)*1000, 
+                par.settings = custom.theme(region = wes_palette(name= "Zissou1",n=32,"continuous")[1:32]))
+```
+![](gun_crime_mgcv_files/figure-gfm/pred_inc_space_time.png)<!-- -->
+
+
+Check predicted number per time period
+```{r}
+pred_num_per_month <- cellStats(exp(predicted_rate_stack + log(USA_pop_2015)), sum)
+obs_num_per_month <- table(cut.Date(gun_crime_sf$date, date_breaks))
+ggplot() + geom_point(aes(pred_num_per_month, obs_num_per_month))
+```
+![](gun_crime_mgcv_files/figure-gfm/obs_fitted_per_month.png)<!-- -->
