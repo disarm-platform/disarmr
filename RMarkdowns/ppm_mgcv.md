@@ -1,7 +1,7 @@
 ## Fitting point process models to disease case data with `mgcv` (or whatever you want)
 We are going to fit a point process model using Generalized Additive Modeling via the `mgcv` package. 
 
-First let's load the gun crime data for the USA in 2015 and corresponding population raster (WorldPop) from the DiSARM package
+First let's load the gun crime data for the USA in 2015 and corresponding population raster (WorldPop) from the [DiSARM package](https://github.com/disarm-platform/disarm-r-package)
 
 
 ```r
@@ -24,7 +24,7 @@ quick_map(gun_crime_sf, 'num_killed')
 
 ![](gun_crime_mgcv_files/figure-gfm/map_crimes-1.png)<!-- -->
 
-Now, to coin a phrase from Nick Golding's [ppmify](https://github.com/goldingn/ppmify) package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling using Poisson regression. Here, we take a similar approach, however, instead of considering the point process as a continuous process, we aggregate points that occur in the same population (offest) cell and give them an appropriate regression weight and offset value. This minimizes the number of observations we have to include in the model (good for large datasets) and also makes some sense as the highest resolution we will (or maybe should) ever be able to predict is at the resolution of our population raster. 
+Now, to coin a phrase from Nick Golding's [ppmify](https://github.com/goldingn/ppmify) package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling using Poisson regression. Here, we take a similar approach, however, instead of considering the point process as a continuous process, we aggregate points that occur in the same population (offset) cell and give them an appropriate regression weight and offset value. This minimizes the number of observations we have to include in the model (good for large datasets) and also makes some sense as the highest resolution we will (or maybe should) ever be able to predict is at the resolution of our population raster. 
 ```r
 ppm_df <- DiSARM::space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
