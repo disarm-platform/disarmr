@@ -8,10 +8,18 @@
 #' @import sf sp raster RANN
 #' @export
 dist_to_sf_raster <- function(sf_obj, ref_raster){
-  
+
+  ref_raster <- ref_raster[[1]] # in case a rasterStack provided
   sf_obj <- st_as_sf(sf_obj)
+  sf_obj <- sf_obj[!st_is_empty(sf_obj),]
+  sf_obj <- st_transform(sf_obj, crs(ref_raster))
   
+  if(st_geometry_type(sf_obj)[1] %in% c("MULTILINESTRING", "LINESTRING")){
+    sf_obj_raster <- rasterize(as(sf_obj, "Spatial"), ref_raster)
+    sf_coords <- coordinates(sf_obj_raster)[!is.na(sf_obj_raster)[],]
+  }else{ 
   sf_coords <- st_coordinates(sf_obj)
+  }
   raster_coords <- coordinates(ref_raster)
   
   # Calc dist matrix
