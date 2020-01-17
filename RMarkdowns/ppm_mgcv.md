@@ -1,5 +1,5 @@
 ## Fitting point process models to disease case data with `mgcv` (or whatever you want)
-We are going to fit a point process model using Generalized Additive Modeling via the `mgcv package. 
+We are going to fit a point process model using Generalized Additive Modeling via the `mgcv` package. 
 
 First let's load the gun crime data for the USA in 2015 and corresponding population raster (WorldPop) from the DiSARM package
 
@@ -24,7 +24,7 @@ quick_map(gun_crime_sf, 'num_killed')
 
 ![](gun_crime_mgcv_files/figure-gfm/map_crimes-1.png)<!-- -->
 
-Now, to coin a phrase from Nick Golding's [ppmify](https://github.com/goldingn/ppmify) package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling using Poisson regression. 
+Now, to coin a phrase from Nick Golding's [ppmify](https://github.com/goldingn/ppmify) package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling using Poisson regression. Here, we take a similar approach, however, instead of considering the point process as a continuous process, we aggregate points that occur in the same population (offest) cell and give them an appropriate regression weight and offset value. This minimizes the number of observations we have to include in the model (good for large datasets) and also makes some sense as the highest resolution we will (or maybe should) ever be able to predict is at the resolution of our population raster. 
 ```r
 ppm_df <- DiSARM::space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
@@ -37,7 +37,7 @@ Now let's fit a model using `mgcv` using a spatial-only model
 ```r
 gam_mod <- mgcv::gam(outcome ~ s(x, y, k=250),
                offset=log(exposure),
-               #weights = regression_weights,
+               weights = regression_weights,
                data = ppm_df$ppm_df,
                method = "REML",
                family = "poisson")
@@ -66,7 +66,7 @@ quick_map(pred_raster_inc, raster_legend_title="Gun crimes/1000")
 
 Using the MapPalettes package we can compare predicted versus observed counts using hexbins
 ```r
-hexbin_stats <- hexbin_raster(predicted_num, 500, function(x){sum(x,na.rm=T)})
+hexbin_stats <- MapPalettes::hexbin_raster(predicted_num, 500, function(x){sum(x,na.rm=T)})
 intersects <- st_intersects(gun_crime_sf, st_as_sf(hexbin_stats))
 intersects_table <- table(unlist(intersects))
 hexbin_stats$observed <- 0
@@ -93,7 +93,7 @@ plot(hexbin_stats, col = case_num_pal(hexbin_stats$stat), main = "Fitted counts"
 
 ## Space-time example
 Let's model the data across months. We can fit a spatio-temporal model using a tensor product between a bivariate spatial smooth and a smooth on time. We'll bump up the number of integration points as these will be spread across the time periods. 
-```{r, ppmify}
+```r
 date_breaks <- seq(ymd("2015-01-01"), ymd("2016-01-01"), by = "month")
 ppm_df_st <- space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
@@ -104,7 +104,7 @@ ppm_df_st <- space_time_ppmify(points = gun_crime_sf,
 ```
 
 Now let's fit a model using `mgcv`. We can make use of the `bam` function to speed things up slightly.
-```{r, fit_model}
+```r
 gam_mod_st <- mgcv::bam(outcome ~ te(x, y, period, bs=c('tp', 'cr'), k=c(150,10),d=c(2,1)),
                offset=log(exposure),
                weights = regression_weights,
@@ -115,7 +115,7 @@ gam_mod_st <- mgcv::bam(outcome ~ te(x, y, period, bs=c('tp', 'cr'), k=c(150,10)
 ```
 
 Now we can predict for each month
-```{r}
+```r
 period_raster <- ppm_df$prediction_stack[[1]]
 predicted_rate_stack <- stack()
 
@@ -136,7 +136,7 @@ rasterVis::levelplot(exp(predicted_rate_stack)*1000,
 
 
 Check predicted number per time period
-```{r}
+```r
 pred_num_per_month <- cellStats(exp(predicted_rate_stack + log(USA_pop_2015)), sum)
 obs_num_per_month <- table(cut.Date(gun_crime_sf$date, date_breaks))
 ggplot() + geom_point(aes(pred_num_per_month, obs_num_per_month))
