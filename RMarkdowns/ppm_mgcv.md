@@ -1,5 +1,5 @@
-## Fitting point process models to disease case data with MGCV (or whatever you want)
-We are going to fit a point process model using Generalized Additive Modeling via the MGCV package. 
+## Fitting point process models to disease case data with `mgcv` (or whatever you want)
+We are going to fit a point process model using Generalized Additive Modeling via the `mgcv package. 
 
 First let's load the gun crime data for the USA in 2015 and corresponding population raster (WorldPop) from the DiSARM package
 
@@ -24,16 +24,16 @@ quick_map(gun_crime_sf, 'num_killed')
 
 ![](gun_crime_mgcv_files/figure-gfm/map_crimes-1.png)<!-- -->
 
-Now, to coin a phrase from Nick Golding's ppmify package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling. 
+Now, to coin a phrase from Nick Golding's [ppmify](https://github.com/goldingn/ppmify) package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling using Poisson regression. 
 ```r
-ppm_df <- space_time_ppmify(points = gun_crime_sf,
+ppm_df <- DiSARM::space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
                 date_start_end=c("2015-01-01", "2015-12-31"),
                 approx_num_int_points = 5000,
                 prediction_stack=TRUE)
 ```
 
-Now let's fit a model using MGCV using a spatial-only model
+Now let's fit a model using `mgcv` using a spatial-only model
 ```r
 gam_mod <- mgcv::gam(outcome ~ s(x, y, k=250),
                offset=log(exposure),
