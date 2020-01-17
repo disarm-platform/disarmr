@@ -35,7 +35,7 @@ ppm_df <- DiSARM::space_time_ppmify(points = gun_crime_sf,
 
 Now let's fit a model using `mgcv` using a spatial-only model
 ```r
-gam_mod <- mgcv::gam(outcome ~ s(x, y, k=250),
+gam_mod <- mgcv::gam(outcome ~ s(x, y, k=500),
                offset=log(exposure),
                weights = regression_weights,
                data = ppm_df$ppm_df,
