@@ -1,8 +1,8 @@
-#' Function create raster of distance to an sf/sp object. Note that the
-#' function currently only calcualtes distances to coordinates/vertices of the 
-#' sf/sp object rather than distance to nearest section/line. 
-#' If this is a line or polygon object this could result in 
-#' some introduced error depending on the density of vertices
+#' Function create raster of distance to an sf/sp object. 
+#' 
+#' Note that if a line/polygon sf object is provided, it is first rasterized to the 
+#' reference raster and distance to the raster centroid of the cell in which the 
+#' line passes through is used as the line coordinate.
 #' @param sf_obj An sf or sp object to calculate distance to
 #' @param ref_raster a reference raster with the extent and resolution of
 #' @import sf sp raster RANN
