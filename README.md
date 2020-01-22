@@ -4,6 +4,6 @@ This package is very much **under construction**. Think of it more as a set of f
 To install
 ```{r}
 library(devtools)
-install_github("disarm-platform/disarm-r-package")
-library(MapPalettes)
+install_github("disarm-platform/disarmr")
+library(disarmr)
 ```
