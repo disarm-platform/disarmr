@@ -1,21 +1,29 @@
 #' Function to predict prevalence excedance probabilities at spatial locations. Currently only support binomial data.
 #' @name prevalence_predictor_mgcv
-#' @param point_data An sf object of points containing `n_trials`, `n_positive` fields
-#' @param exceedance_threshold The prevalence threshold for which exceedance probabilities are required
-#' @param batch_size The number of adaptively selected locations required
-#' @param layer_names Names of column corresponding covariates to use. Choose from 'Layer names' as outlined [here](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md)
+#' @param point_data Required. An sf object of points containing `n_trials`, `n_positive` fields
+#' @param layer_names Optional names of column corresponding covariates to use. Choose from 'Layer names' as 
+#' outlined [here](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md). If none provided
+#' then spatial only model assumed.
+#' @param exceedance_threshold Required. The prevalence threshold for which exceedance probabilities are required
 #' @param v The number of folds to use in the machine learning step. Defaults to 10. 
+#' @param batch_size The number of adaptively selected locations required. Defaults to NULL. 
+#' @param uncertainty_fieldname If `batch_size` is specified (>0), adaptive sampling is performed. To sample
+#' in order to minimize classification uncertainty choose 'exceedance_probability'. To sample in order to minimize prediction
+#' error choose 'prevalence_bci_width'.
 #' @import geojsonio httr sf sp mgcv RANN
 #' @export
 
 prevalence_predictor_mgcv <- function(point_data, layer_names, v=10, exceedance_threshold,
-                                      batch_size, uncertainty_fieldname) {
+                                      batch_size=NULL, uncertainty_fieldname) {
     
     set.seed(1981)
   
     # Run some checks
     if(uncertainty_fieldname %in% c("exceedance_probability", "prevalence_bci_width")){
       stop("'uncertainty_fieldname' must be either 'exceedance_probability' or 'prevalence_bci_width'")
+    }
+    if(batch_size==0){
+      batch_size <- NULL
     }
     
     if(!is.null(layer_names)){ 

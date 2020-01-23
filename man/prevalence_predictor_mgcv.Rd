@@ -5,18 +5,24 @@
 \title{Function to predict prevalence excedance probabilities at spatial locations. Currently only support binomial data.}
 \usage{
 prevalence_predictor_mgcv(point_data, layer_names, v = 10,
-  exceedance_threshold, batch_size, uncertainty_fieldname)
+  exceedance_threshold, batch_size = NULL, uncertainty_fieldname)
 }
 \arguments{
-\item{point_data}{An sf object of points containing `n_trials`, `n_positive` fields}
+\item{point_data}{Required. An sf object of points containing `n_trials`, `n_positive` fields}
 
-\item{layer_names}{Names of column corresponding covariates to use. Choose from 'Layer names' as outlined [here](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md)}
+\item{layer_names}{Optional names of column corresponding covariates to use. Choose from 'Layer names' as 
+outlined [here](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md). If none provided
+then spatial only model assumed.}
 
 \item{v}{The number of folds to use in the machine learning step. Defaults to 10.}
 
-\item{exceedance_threshold}{The prevalence threshold for which exceedance probabilities are required}
+\item{exceedance_threshold}{Required. The prevalence threshold for which exceedance probabilities are required}
 
-\item{batch_size}{The number of adaptively selected locations required}
+\item{batch_size}{The number of adaptively selected locations required. Defaults to NULL.}
+
+\item{uncertainty_fieldname}{If `batch_size` is specified (>0), adaptive sampling is performed. To sample
+in order to minimize classification uncertainty choose 'exceedance_probability'. To sample in order to minimize prediction
+error choose 'prevalence_bci_width'.}
 }
 \description{
 Function to predict prevalence excedance probabilities at spatial locations. Currently only support binomial data.
