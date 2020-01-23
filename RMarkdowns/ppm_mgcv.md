@@ -26,7 +26,7 @@ quick_map(gun_crime_sf, 'num_killed')
 
 Now, to coin a phrase from Nick Golding's [ppmify](https://github.com/goldingn/ppmify) package, let's ppmify our data using `DiSARM::space_time_ppmify` to get it ready for modeling using Poisson regression. Here, we take a similar approach, however, instead of considering the point process as a continuous process, we aggregate points that occur in the same population (offset) cell and give them an appropriate regression weight and offset value. This minimizes the number of observations we have to include in the model (good for large datasets) and also makes some sense as the highest resolution we will (or maybe should) ever be able to predict is at the resolution of our population raster. 
 ```r
-ppm_df <- DiSARM::space_time_ppmify(points = gun_crime_sf,
+ppm_df <- disarmr::space_time_ppmify(points = gun_crime_sf,
                 exposure = USA_pop_2015,
                 date_start_end=c("2015-01-01", "2015-12-31"),
                 approx_num_int_points = 5000,
