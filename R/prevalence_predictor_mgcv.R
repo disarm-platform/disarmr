@@ -39,14 +39,14 @@ prevalence_predictor_mgcv <- function(point_data, layer_names, v=10, exceedance_
             content_type_json(),
             timeout(90)
           )
-        
+
         # Get contents of the response
         response_content <- content(response)
         
         points_sf <- st_read(as.json(response_content$result), quiet = TRUE)
         points_sf$n_trials <- as.numeric(as.character(points_sf$n_trials))
         points_sf$n_positive <- as.numeric(as.character(points_sf$n_positive))
-        points_sf$id <- 1:nrow(points_sf)
+        #points_sf$id <- 1:nrow(points_sf)
         
         # Pass into cv-ml
         response_content <- cv_ml(points_sf, layer_names = layer_names,
@@ -100,7 +100,7 @@ prevalence_predictor_mgcv <- function(point_data, layer_names, v=10, exceedance_
                      data = train_data,
                      family="binomial")
     }    
-    
+
     # Get posterior metrics
     mod_data$cv_predictions <- mod_data$fitted_predictions
     
@@ -113,7 +113,7 @@ prevalence_predictor_mgcv <- function(point_data, layer_names, v=10, exceedance_
     for(i in names(posterior_metrics)){
       point_data[[i]] <- posterior_metrics[[i]]
     }
-    
+
     # If batch_size is specitfied, then perform adaptive sampling
     if(!is.null(batch_size)){
         chosen <- FALSE
@@ -157,7 +157,7 @@ prevalence_predictor_mgcv <- function(point_data, layer_names, v=10, exceedance_
         point_data$adaptively_selected <- FALSE
         point_data$adaptively_selected[new_batch_idx] <- TRUE
     }
-    
+
     return(point_data)
   
   
