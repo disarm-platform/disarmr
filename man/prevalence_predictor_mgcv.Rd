@@ -4,11 +4,13 @@
 \alias{prevalence_predictor_mgcv}
 \title{Function to predict prevalence excedance probabilities at spatial locations. Currently only support binomial data.}
 \usage{
-prevalence_predictor_mgcv(point_data, layer_names, v = 10,
-  exceedance_threshold, batch_size = NULL, uncertainty_fieldname)
+prevalence_predictor_mgcv(point_data, layer_names = NULL, v = 10,
+  exceedance_threshold, batch_size = NULL, uncertainty_fieldname,
+  additional_covariates = NULL,
+  covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor")
 }
 \arguments{
-\item{point_data}{Required. An sf object of points containing `n_trials`, `n_positive` fields}
+\item{point_data}{Required. An sf object of points containing at least `n_trials`, `n_positive` fields}
 
 \item{layer_names}{Optional names of column corresponding covariates to use. Choose from 'Layer names' as 
 outlined [here](https://github.com/disarm-platform/fn-covariate-extractor/blob/master/SPECS.md). If none provided
@@ -23,6 +25,13 @@ then spatial only model assumed.}
 \item{uncertainty_fieldname}{If `batch_size` is specified (>0), adaptive sampling is performed. To sample
 in order to minimize classification uncertainty choose 'exceedance_probability'. To sample in order to minimize prediction
 error choose 'prevalence_bci_width'.}
+
+\item{additional_covariates}{Optional vector of column names of `point_data` referencing additional covariates to 
+include in the model. Defulats to NULL}
+
+\item{covariate_extractor_url}{The function currently makes use of the temporary DiSARM API function `fn-covariate-extractor` 
+to extract values of `layer_names` at locations specified in `point_data`. If this algorithm is hosted 
+somewhere other than the DiSARM API, include the URL here.}
 }
 \description{
 Function to predict prevalence excedance probabilities at spatial locations. Currently only support binomial data.
