@@ -2,6 +2,7 @@
 
 export(adaptive_sample_auto)
 export(choose_batch)
+export(choose_batch_simple)
 export(cv_ml)
 export(dist_to_sf_raster)
 export(fit_hal_parallel)
