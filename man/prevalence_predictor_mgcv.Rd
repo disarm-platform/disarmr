@@ -7,7 +7,8 @@
 prevalence_predictor_mgcv(point_data, layer_names = NULL, v = 10,
   exceedance_threshold, batch_size = NULL, uncertainty_fieldname,
   additional_covariates = NULL,
-  covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor")
+  covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
+  seed = 1981)
 }
 \arguments{
 \item{point_data}{Required. An sf object of points containing at least `n_trials`, `n_positive` fields}

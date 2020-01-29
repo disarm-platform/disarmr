@@ -102,7 +102,7 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
                                  coords_cols = c("X", "Y"),
                                  min_dist  = min(diff(range(train_data$X)), diff(range(train_data$Y)))/100,
                                  max_dist = max(min(diff(range(train_data$X)), diff(range(train_data$Y))))/2,
-                                 length.out = 10,
+                                 length.out = 20,
                                  model_data = train_data,
                                  k=k)
 
@@ -117,7 +117,7 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
     
     posterior_metrics <- gam_posterior_metrics(gam_mod,
                                                mod_data,
-                                               200,
+                                               500,
                                                exceedance_threshold)
     
     # Bind to point_data
