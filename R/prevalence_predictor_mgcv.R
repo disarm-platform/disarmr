@@ -127,42 +127,49 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
 
     # If batch_size is specitfied, then perform adaptive sampling
     if(!is.null(batch_size)){
-        chosen <- FALSE
-        delta <- opt_range$best_m
-        criterion <- ifelse(uncertainty_fieldname=="exceedance_probability",
-                            "exceedprob", "predvar")
-        if(criterion == "exceedprob"){
-          excd.prob.col = "exceedance_probability"
-          pred.var.col = NULL
-        }else{
-          excd.prob.col = NULL
-          pred.var.col = "prevalence_bci_width"
-        }
-        
-        # Automatically wind down delta in order to allow batch_size samples to be chosen
-        while(chosen == FALSE){
-          obj1 <- point_data[is.na(point_data$n_trials),]
-          obj2 <- point_data[!is.na(point_data$n_trials),]
-              new_batch <- adaptive_sample_auto(obj1 = obj1,
-                                   obj2 = obj2,
-                                   excd.prob.col = excd.prob.col,
-                                   pred.var.col = pred.var.col,
-                                   batch.size = batch_size,
-                                   delta = delta,
-                                   criterion = criterion,
-                                   poly = NULL,
-                                   plotit = FALSE)
-              if(nrow(new_batch$sample.locs$added.sample) < batch_size){
-                delta <- delta*0.9
-              }else{
-                chosen <- TRUE
-              }
-        }
-        
-        # Get indeces of those adaptively selected
-        nearest <- RANN::nn2(st_coordinates(new_batch$sample.locs$added.sample),
-                                   st_coordinates(obj1), k=1)
-        new_batch_idx <- which(nearest$nn.dists==0)
+      
+      new_batch_idx <- choose_batch_simple(point_data = point_data, 
+                          batch_size = batch_size,
+                          uncertainty_fieldname = 'exceedance_uncertainty',
+                          candidate = is.na(point_data$n_trials))
+      
+      
+        # chosen <- FALSE
+        # delta <- opt_range$best_m
+        # criterion <- ifelse(uncertainty_fieldname=="exceedance_probability",
+        #                     "exceedprob", "predvar")
+        # if(criterion == "exceedprob"){
+        #   excd.prob.col = "exceedance_probability"
+        #   pred.var.col = NULL
+        # }else{
+        #   excd.prob.col = NULL
+        #   pred.var.col = "prevalence_bci_width"
+        # }
+        # 
+        # # Automatically wind down delta in order to allow batch_size samples to be chosen
+        # while(chosen == FALSE){
+        #   obj1 <- point_data[is.na(point_data$n_trials),]
+        #   obj2 <- point_data[!is.na(point_data$n_trials),]
+        #       new_batch <- adaptive_sample_auto(obj1 = obj1,
+        #                            obj2 = obj2,
+        #                            excd.prob.col = excd.prob.col,
+        #                            pred.var.col = pred.var.col,
+        #                            batch.size = batch_size,
+        #                            delta = delta,
+        #                            criterion = criterion,
+        #                            poly = NULL,
+        #                            plotit = FALSE)
+        #       if(nrow(new_batch$sample.locs$added.sample) < batch_size){
+        #         delta <- delta*0.9
+        #       }else{
+        #         chosen <- TRUE
+        #       }
+        # }
+        # 
+        # # Get indeces of those adaptively selected
+        # nearest <- RANN::nn2(st_coordinates(new_batch$sample.locs$added.sample),
+        #                            st_coordinates(obj1), k=1)
+        # new_batch_idx <- which(nearest$nn.dists==0)
         
         # Add adaptively selected column
         point_data$adaptively_selected <- FALSE
