@@ -20,9 +20,10 @@
 
 prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceedance_threshold,
                                       batch_size=NULL, uncertainty_fieldname, additional_covariates=NULL,
-                                      covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor") {
+                                      covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
+                                      seed = 1981) {
     
-    set.seed(1981)
+    set.seed(seed)
 
     # Run some checks
     if(!(uncertainty_fieldname %in% c("exceedance_probability", "prevalence_bci_width"))){
@@ -63,12 +64,12 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
         mod_data <- cbind(mod_data, st_coordinates(mod_data_sf))
         mod_data$n_neg <- mod_data$n_trials - mod_data$n_positive
         train_data <- mod_data[!is.na(mod_data$n_trials),]
-        pred_data <- mod_data[is.na(mod_data$n_trials),]
+        #pred_data <- mod_data[is.na(mod_data$n_trials),]
         
         # Choose k
         k <- floor(nrow(train_data)*0.9)
-        if(k > 100){
-          k <- 100
+        if(k > 200){
+          k <- 200
         }
         
         opt_range <- optimal_range(y = "cbind(n_positive, n_neg)", 
@@ -87,9 +88,14 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
         
     }else{
       # Choose k
+      mod_data <- as.data.frame(point_data)
+      mod_data <- cbind(mod_data, st_coordinates(point_data))
+      mod_data$n_neg <- mod_data$n_trials - mod_data$n_positive
+      train_data <- mod_data[!is.na(mod_data$n_trials),]
+      #pred_data <- mod_data[is.na(mod_data$n_trials),]
       k <- floor(nrow(train_data)*0.9)
-      if(k > 100){
-        k <- 100
+      if(k > 200){
+        k <- 200
       }
       
       opt_range <- optimal_range(y = "cbind(n_positive, n_neg)",
