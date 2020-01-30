@@ -11,7 +11,10 @@
 #' @examples 
 
 choose_batch <- function(XY, entropy, candidate, rho, nu, batch_size) {
-
+  
+  if(batch_size >= sum(candidate)){
+    stop("'batch_size' must < number of candidates")
+  }
   candidate_idx <- which(candidate==TRUE)
   XY <- XY[candidate==TRUE,]
   entropy <- entropy[candidate==TRUE]
