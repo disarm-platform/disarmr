@@ -128,10 +128,21 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
     # If batch_size is specitfied, then perform adaptive sampling
     if(!is.null(batch_size)){
       
-      new_batch_idx <- choose_batch_simple(point_data = point_data, 
-                          batch_size = batch_size,
-                          uncertainty_fieldname = 'exceedance_uncertainty',
-                          candidate = is.na(point_data$n_trials))
+      if(uncertainty_fieldname == 'exceedance_probability'){
+        uncertainty_fieldname = 'exceedance_uncertainty'
+      }
+      
+      # new_batch_idx <- choose_batch_simple(point_data = point_data, 
+      #                     batch_size = batch_size,
+      #                     uncertainty_fieldname = uncertainty_fieldname,
+      #                     candidate = is.na(point_data$n_trials))
+      
+      new_batch_idx <- choose_batch(st_coordinates(point_data),
+                   entropy = point_data$entropy,
+                   candidate = is.na(point_data$n_positive),
+                   rho = 1 / opt_range$best_m,
+                   nu = 1.5,
+                   batch_size = 50)
       
       
         # chosen <- FALSE
