@@ -142,7 +142,7 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
                    candidate = is.na(point_data$n_positive),
                    rho = 1 / opt_range$best_m,
                    nu = 1.5,
-                   batch_size = 50)
+                   batch_size = batch_size)
       
       
         # chosen <- FALSE
