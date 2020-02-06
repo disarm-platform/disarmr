@@ -25,7 +25,7 @@ optimal_range <- function(y,
                           model_data, 
                           m1 = 3,
                           k=-1){
-  
+
   REML <- r <- seq(min_dist, max_dist, length.out = length.out)
   for (i in seq_along(r)) {
     if(!is.null(x)){
