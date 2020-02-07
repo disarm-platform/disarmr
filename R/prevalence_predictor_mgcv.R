@@ -38,13 +38,18 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
             cov_ext_input_data_list <- list(points = geojson_list(point_data),
                                             layer_names = layer_names)
             
-            response <-
-              httr::POST(
-                url = covariate_extractor_url,
-                body = as.json(cov_ext_input_data_list),
-                content_type_json(),
-                timeout(90)
-              )
+            status <- 0
+            while(status != 200){
+              print('Trying cov-ext')
+              response <-
+                httr::POST(
+                  url = covariate_extractor_url,
+                  body = as.json(cov_ext_input_data_list),
+                  content_type_json(),
+                  timeout(90)
+                )
+              print(status <- response$status)
+            }
     
             # Get contents of the response
             response_content <- content(response)
