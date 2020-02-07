@@ -4,13 +4,16 @@
 #' @param layer_names Names of column corresponding covariates to use
 #' @param model_type Either `randomForest`, in which case a random forest 
 #' @param k The number of folds to use
+#' @param fix_cov If wishing to fix the values of any covariates when producing fitted values, specify as 
+#' list with 2 elements 'cov_name' and 'cov_val' e.g. fix_cov = list(cov_name = 'x', cov_val = 1)
 #' using the ranger package is fit or `hal`, in which case
 #' a highly adaptive lasso using the hal9001 package is fit. Note the `hal` 
 #' is computationally expensive and not recommended for large 
 #' (>200) datasets. 
 #' @import parallel ranger caret
 #' @export
-cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
+cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20,
+                  fix_cov=NULL) {
 
   seed <- 1981
   points_df <- as.data.frame(points)
@@ -79,6 +82,14 @@ cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20) {
     
     pred_data <- as.data.frame(points_df[,layer_names])
     names(pred_data) <- layer_names
+    
+    # If fixing any covariates, specify here
+    if(!is.null(fix_cov)){
+      for(j in 1:length(fix_cov$cov_name)){
+      pred_data[[fix_cov$cov_name[j]]] <- fix_cov$cov_val[j]
+      }
+    }
+    
     fitted_predictions <- predict(rf_fit, pred_data)
     points$fitted_predictions <- fitted_predictions$predictions[,2]
     points$cv_predictions <- NA
