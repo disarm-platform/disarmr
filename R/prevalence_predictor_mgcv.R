@@ -40,7 +40,6 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
             
             status <- 0
             while(status != 200){
-              print('Trying cov-ext')
               response <-
                 httr::POST(
                   url = covariate_extractor_url,
@@ -48,7 +47,6 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
                   content_type_json(),
                   timeout(90)
                 )
-              print(status <- response$status)
             }
     
             # Get contents of the response
