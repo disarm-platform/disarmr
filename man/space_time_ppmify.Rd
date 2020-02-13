@@ -4,7 +4,7 @@
 \alias{space_time_ppmify}
 \title{The space_time_ppmify function}
 \usage{
-space_time_ppmify(points, covariates = NULL, exposure, date_start_end,
+space_time_ppmify(points, exposure, covariates = NULL, date_start_end,
   periods = date_start_end, prediction_exposure = exposure,
   approx_num_int_points = 10000, prediction_stack = FALSE)
 }
@@ -13,8 +13,9 @@ space_time_ppmify(points, covariates = NULL, exposure, date_start_end,
 
 \item{exposure}{rasterLayer of exposure (to be used as offset). Required. 
 Raster representing the population over which points arose. Currently 
-only accepts a single raster which is used across all time periods.
-#' @param covariates Optional rasterLayer or rasterStack of additional covariates to include. 
+only accepts a single raster which is used across all time periods.}
+
+\item{covariates}{Optional rasterLayer or rasterStack of additional covariates to include. 
 Should be at the same resolution/extent as `exposure`. If not, will be resampled to the same 
 resolution and extent as `exposure`.}
 

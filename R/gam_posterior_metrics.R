@@ -22,7 +22,7 @@ gam_posterior_metrics <- function(gam_mod,
     quantiles <- quantile(realization, prob = c(0.025, 0.975))
     return(as.vector(diff(quantiles)))
   }
-  
+
   logit_prediction <- predict(gam_mod, new_data) + new_data$fitted_predictions_logit
   prevalence_prediction <- exp(logit_prediction) / (1 + exp(logit_prediction))
   prevalence_bci_width <- apply(sims, 1, get_bci_width)
