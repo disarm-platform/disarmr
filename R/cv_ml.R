@@ -33,26 +33,26 @@ cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20,
   # Save validation indeces for later
   valid_indeces <- unlist(folds_list)
   
-  if(model_type == "hal"){
-  # Now apply HAL to each fold in parallel 
-  cv_predictions <- parallel::mclapply(folds_df_list, FUN = fit_hal_parallel,
-                             mc.cores = parallel::detectCores() - 1,
-                             X_var = layer_names,
-                             n_pos_var = "n_positive",
-                             n_neg_var = "n_negative")
-  
-  # Add cv predictions back onto data.frame
-  points_df_train$cv_preds[valid_indeces] <- unlist(cv_predictions)
-  
-  # Now fit HAL to full dataset and create fitted predictions
-  hal_fit <- fit_hal(X = points_df_train[,layer_names], 
-                     Y = cbind(points_df_train$n_negative,
-                               points_df_train$n_positive), 
-                     family = "binomial", yolo = FALSE)
-  points$fitted_predictions <- predict(hal_fit, new_data = points_df[,layer_names])
-  points$cv_predictions <- NA
-  points$cv_predictions[points_df_train$row_id[valid_indeces]] <- unlist(cv_predictions)
-  }
+  # if(model_type == "hal"){
+  # # Now apply HAL to each fold in parallel 
+  # cv_predictions <- parallel::mclapply(folds_df_list, FUN = fit_hal_parallel,
+  #                            mc.cores = parallel::detectCores() - 1,
+  #                            X_var = layer_names,
+  #                            n_pos_var = "n_positive",
+  #                            n_neg_var = "n_negative")
+  # 
+  # # Add cv predictions back onto data.frame
+  # points_df_train$cv_preds[valid_indeces] <- unlist(cv_predictions)
+  # 
+  # # Now fit HAL to full dataset and create fitted predictions
+  # hal_fit <- fit_hal(X = points_df_train[,layer_names], 
+  #                    Y = cbind(points_df_train$n_negative,
+  #                              points_df_train$n_positive), 
+  #                    family = "binomial", yolo = FALSE)
+  # points$fitted_predictions <- predict(hal_fit, new_data = points_df[,layer_names])
+  # points$cv_predictions <- NA
+  # points$cv_predictions[points_df_train$row_id[valid_indeces]] <- unlist(cv_predictions)
+  # }
   
   
   if(model_type == "randomforest"){

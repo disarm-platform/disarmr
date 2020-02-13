@@ -4,8 +4,7 @@
 #' @param X_var Names of column corresponding covariates to use
 #' @param n_pos_var Name of column corresponding to numbers positive
 #' @param n_neg_var Name of column corresponding to numbers negative
-#' @export
-#library(hal9001)
+
 fit_hal_parallel <- function(folds_df_list_fold,
                              X_var,
                              n_pos_var,
