@@ -15,6 +15,7 @@ gam_posterior_metrics <- function(gam_mod,
   Cg <- predict(gam_mod, new_data, type = "lpmatrix")
   sims <- rmvn(n_sims, mu = coef(gam_mod), V = vcov(gam_mod, unconditional = TRUE))
   fits <- Cg %*% t(sims)
+  fits <- fits + new_data$fitted_predictions_logit
   sims <- exp(fits) / (1 + exp(fits))
 
   get_bci_width <- function(realization){
@@ -22,7 +23,8 @@ gam_posterior_metrics <- function(gam_mod,
     return(as.vector(diff(quantiles)))
   }
   
-  prevalence_prediction <- predict(gam_mod, new_data, type="response")
+  logit_prediction <- predict(gam_mod, new_data) + new_data$fitted_predictions_logit
+  prevalence_prediction <- exp(logit_prediction) / (1 + exp(logit_prediction))
   prevalence_bci_width <- apply(sims, 1, get_bci_width)
   
   # If 'excedance probability' exists, then calc additional stats
