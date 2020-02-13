@@ -16,6 +16,7 @@
 #' @param uncertainty_fieldname If `batch_size` is specified (>0), adaptive sampling is performed. To sample
 #' in order to minimize classification uncertainty choose 'exceedance_probability'. To sample in order to minimize prediction
 #' error choose 'prevalence_bci_width'.
+#' @param m check out m in ?gam
 #' @import geojsonio httr sf sp mgcv RANN
 #' @export
 
@@ -29,7 +30,7 @@ prevalence_predictor_mgcv_st <- function(point_data,
                                       additional_covariates=NULL,
                                       covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
                                       seed = 1981,
-                                      m=NULL,
+                                      m=3,
                                       fix_cov = NULL) {
     
     set.seed(seed)
@@ -55,9 +56,7 @@ prevalence_predictor_mgcv_st <- function(point_data,
             cov_ext_input_data_list <- list(points = geojson_list(point_data),
                                             layer_names = layer_names)
 
-            status <- 0
-            while(status != 200){
-              print('Trying cov-ext')
+
             response <-
               httr::POST(
                 url = covariate_extractor_url,
@@ -65,8 +64,7 @@ prevalence_predictor_mgcv_st <- function(point_data,
                 content_type_json(),
                 timeout(90)
               )
-            print(status <- response$status)
-            }
+
     
             # Get contents of the response
             response_content <- content(response)
@@ -94,17 +92,18 @@ prevalence_predictor_mgcv_st <- function(point_data,
           k <- 200
         }
         
-        opt_range <- optimal_range(y = "cbind(n_positive, n_neg)", 
-                      x = "cv_predictions",
-                      coords_cols = c("X", "Y"),
-                      min_dist  = min(diff(range(train_data$X)), diff(range(train_data$Y)))/100, 
-                      max_dist = max(min(diff(range(train_data$X)), diff(range(train_data$Y))))/2, 
-                      length.out = 20, 
-                      model_data = train_data, 
-                      k=k)
+        # opt_range <- optimal_range(y = "cbind(n_positive, n_neg)", 
+        #               x = "cv_predictions",
+        #               coords_cols = c("X", "Y"),
+        #               min_dist  = min(diff(range(train_data$X)), diff(range(train_data$Y)))/100, 
+        #               max_dist = max(min(diff(range(train_data$X)), diff(range(train_data$Y))))/2, 
+        #               length.out = 20, 
+        #               model_data = train_data, 
+        #               k=k)
         
-        gam_mod <- gam(cbind(n_positive, n_neg) ~ cv_predictions +
-                         s(X, Y, bs="gp", k=k, m=c(3, opt_range$best_m)),
+        gam_mod <- gam(cbind(n_positive, n_neg) ~ 
+                         s(X, Y, bs="gp", k=k, m=m),
+                       offset = cv_predictions_logit,
                        data = train_data,
                        method="REML",
                        family="binomial")
@@ -120,12 +119,25 @@ prevalence_predictor_mgcv_st <- function(point_data,
           if(space_knots > 200){
             space_knots <- 200
           }
-
-          gam_mod <- gam(cbind(n_positive, n_neg) ~ cv_predictions +
-                           te(X, Y, t, bs=c('tp','cr'), d=c(2,1), k=c(space_knots, time_knots), m=m),
-                         data = train_data,
-                         method="REML",
-                         family="binomial")  
+          # browser()
+          # gam_mod <- gam(cbind(n_positive, n_neg) ~ cv_predictions +
+          #                  te(X, Y, t, bs=c('tp','cr'), d=c(2,1), k=c(space_knots, time_knots), m=m),
+          #                data = train_data,
+          #                method="REML",
+          #                family="binomial")  
+          # 
+          # gam_mod2 <- gam(cbind(n_positive, n_neg) ~ cv_predictions_logit +
+          #                  te(X, Y, t, bs=c('tp','cr'), d=c(2,1), k=c(space_knots, time_knots), m=m),
+          #                data = train_data,
+          #                method="REML",
+          #                family="binomial")  
+          
+          gam_mod <- gam(cbind(n_positive, n_neg) ~
+                            te(X, Y, t, bs=c('ds','cr'), d=c(2,1), k=c(space_knots, time_knots), m=m),
+                          offset = cv_predictions_logit,
+                          data = train_data,
+                          method="REML",
+                          family="binomial")
           
         }
         
@@ -140,26 +152,26 @@ prevalence_predictor_mgcv_st <- function(point_data,
       if(k > 200){
         k <- 200
       }
-      
+
       if(is.null(time_field)){
-          opt_range <- optimal_range(y = "cbind(n_positive, n_neg)",
-                                     coords_cols = c("X", "Y"),
-                                     min_dist  = min(diff(range(train_data$X)), diff(range(train_data$Y)))/100,
-                                     max_dist = max(min(diff(range(train_data$X)), diff(range(train_data$Y))))/2,
-                                     length.out = 20,
-                                     model_data = train_data,
-                                     k=k)
-          
+          # opt_range <- optimal_range(y = "cbind(n_positive, n_neg)",
+          #                            coords_cols = c("X", "Y"),
+          #                            min_dist  = min(diff(range(train_data$X)), diff(range(train_data$Y)))/100,
+          #                            max_dist = max(min(diff(range(train_data$X)), diff(range(train_data$Y))))/2,
+          #                            length.out = 20,
+          #                            model_data = train_data,
+          #                            k=k)
+
           gam_mod <- gam(cbind(n_positive, n_neg) ~
-                           s(X, Y, bs="gp", k=k, m=c(3, opt_range$best_m)),
+                           s(X, Y, bs="gp", k=k, m=m),
                          data = train_data,
                          method="REML",
                          family="binomial")
-          
+
           }else{
             opt_range <- list(best_m = max(dist(train_data[,c("X", "Y")])))
             train_data$t <- as.numeric(as.character(unlist(train_data[[time_field]])))
-            
+
             time_knots <- length(unique(train_data$t))
               if(time_knots > 6){
                 time_knots <- 6
@@ -168,20 +180,20 @@ prevalence_predictor_mgcv_st <- function(point_data,
             if(space_knots > 150){
               space_knots <- 150
             }
-            
+
             gam_mod <- gam(cbind(n_positive, n_neg) ~
-                             te(X, Y, t, bs=c('gp','cr'), d=c(2,1), k=c(space_knots, time_knots), m=3),
+                             te(X, Y, t, bs=c('ds','cr'), d=c(2,1), k=c(space_knots, time_knots), m=m),
                            data = train_data,
                            method="REML",
-                           family="binomial")  
-            
+                           family="binomial")
+
       }
 
 
-    }    
+    }
 
     # Get posterior metrics
-    mod_data$cv_predictions <- mod_data$fitted_predictions
+    mod_data$cv_predictions_logit <- mod_data$fitted_predictions_logit 
     
     ## HERE CAN SET THE TIME FOR PREDICTIONS IF MULTI-TEMPORAL
     if(!is.null(time_field)){
