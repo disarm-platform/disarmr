@@ -93,15 +93,15 @@ cv_ml <- function(points, layer_names, model_type = "randomforest", k = 20,
     fitted_predictions <- predict(rf_fit, pred_data)
     points$fitted_predictions <- fitted_predictions$predictions[,2]
     fitted_predictions_adj <- points$fitted_predictions 
-    fitted_predictions_adj[fitted_predictions_adj==0] <- 0.001
-    fitted_predictions_adj[fitted_predictions_adj==1] <- 0.999
+    fitted_predictions_adj[fitted_predictions_adj==0] <- 1e-6
+    fitted_predictions_adj[fitted_predictions_adj==1] <- 1 - 1e-6
     points$fitted_predictions_logit <- log(fitted_predictions_adj / (1-fitted_predictions_adj))
     
     points$cv_predictions <- NA
     points$cv_predictions[points_df_train$row_id[valid_indeces]] <- unlist(cv_predictions)
     cv_predictions_adj <- points$cv_predictions
-    cv_predictions_adj[cv_predictions_adj==0] <- 0.001
-    cv_predictions_adj[cv_predictions_adj==1] <- 0.999
+    cv_predictions_adj[cv_predictions_adj==0] <- 1e-6
+    cv_predictions_adj[cv_predictions_adj==1] <- 1 - 1e-6
     points$cv_predictions_logit <- log(cv_predictions_adj / (1-cv_predictions_adj))
   }
   return(list(points = points,

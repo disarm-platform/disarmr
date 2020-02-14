@@ -1,6 +1,6 @@
 Package: disarmr
 Title: A collection of spatial analysis functions related to the DiSARM project at UCSF
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: person("Hugh", "Sturrock", email = "hughsturrock@gmail.com", role = c("aut", "cre"))
 Description: A collection of spatial analysis functions related to the DiSARM project at UCSF.
 Depends: R (>= 3.5.3)
