@@ -4,8 +4,7 @@
 \alias{choose_batch_simple}
 \title{Function to take a spatially disaggregated sample weighted by values at points (e.g. uncertainty)}
 \usage{
-choose_batch_simple(point_data, batch_size, uncertainty_fieldname,
-  candidate)
+choose_batch_simple(point_data, batch_size, uncertainty_fieldname, candidate)
 }
 \arguments{
 \item{point_data}{an sf object containing points}

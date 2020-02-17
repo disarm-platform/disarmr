@@ -4,9 +4,17 @@
 \alias{adaptive_sample_auto}
 \title{Spatially adaptive sampling. Idnentical to adaptive.sample from geosample package, except that delta is automatically decreased to work}
 \usage{
-adaptive_sample_auto(obj1, obj2, pred.var.col = NULL,
-  excd.prob.col = NULL, batch.size = 1, delta, criterion,
-  poly = NULL, plotit = TRUE)
+adaptive_sample_auto(
+  obj1,
+  obj2,
+  pred.var.col = NULL,
+  excd.prob.col = NULL,
+  batch.size = 1,
+  delta,
+  criterion,
+  poly = NULL,
+  plotit = TRUE
+)
 }
 \arguments{
 \item{obj1}{a \code{sf} or \code{sp} object of \bold{locations available for sampling}, where each line contains the coordinates of a spatial location, a \bold{prediction variance} or an \bold{exceedance probability} at that location and, optionally, values of one or more covariates. NOTE that only one of the two quantities (i.e. PV or EP) is required to add samples adaptively. Locations that meet the specified selection criterion are equally likely to be sampled subject to spatial contraints. See \code{criterion} and \bold{Details} for more information.}

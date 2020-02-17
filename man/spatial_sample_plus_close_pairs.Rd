@@ -9,8 +9,7 @@ distance to nearest selected site (i.e. there is a greater probability of being 
 is from the nearest selected site). If `n_close` is specified, then clusters of close pairs of points are 
 included in the selection.}
 \usage{
-spatial_sample_plus_close_pairs(coords, n_close = 0, n_spatial,
-  power = 1)
+spatial_sample_plus_close_pairs(coords, n_close = 0, n_spatial, power = 1)
 }
 \arguments{
 \item{coords}{An sf object of points to sample from.}

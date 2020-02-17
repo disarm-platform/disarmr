@@ -4,8 +4,13 @@
 \alias{quick_map}
 \title{Function to make quick leaflet maps of spatial data}
 \usage{
-quick_map(plot_data, value_field = NULL, colors = NULL,
-  circle_size = 3, raster_legend_title = NULL)
+quick_map(
+  plot_data,
+  value_field = NULL,
+  colors = NULL,
+  circle_size = 3,
+  raster_legend_title = NULL
+)
 }
 \arguments{
 \item{plot_data}{An sp, sf or rasterLayer object to plot}

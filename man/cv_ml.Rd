@@ -4,8 +4,7 @@
 \alias{cv_ml}
 \title{Function to fit a 10 fold cross validated ML model. Currently only support binomial data.}
 \usage{
-cv_ml(points, layer_names, model_type = "randomforest", k = 20,
-  fix_cov = NULL)
+cv_ml(points, layer_names, model_type = "randomforest", k = 20, fix_cov = NULL)
 }
 \arguments{
 \item{points}{A data.frame or sfc object containing `n_trials`, `n_positive` fields}

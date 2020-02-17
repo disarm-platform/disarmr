@@ -4,8 +4,12 @@
 \alias{get_int_points_exposure_weights}
 \title{The get_int_points_exposure_weights function}
 \usage{
-get_int_points_exposure_weights(ppmx, ppm_cases_points_counts,
-  exposure_raster, num_periods)
+get_int_points_exposure_weights(
+  ppmx,
+  ppm_cases_points_counts,
+  exposure_raster,
+  num_periods
+)
 }
 \arguments{
 \item{ppmx}{}

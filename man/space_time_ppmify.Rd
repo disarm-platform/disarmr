@@ -4,9 +4,16 @@
 \alias{space_time_ppmify}
 \title{The space_time_ppmify function}
 \usage{
-space_time_ppmify(points, exposure, covariates = NULL, date_start_end,
-  periods = date_start_end, prediction_exposure = exposure,
-  approx_num_int_points = 10000, prediction_stack = FALSE)
+space_time_ppmify(
+  points,
+  exposure,
+  covariates = NULL,
+  date_start_end,
+  periods = date_start_end,
+  prediction_exposure = exposure,
+  approx_num_int_points = 10000,
+  prediction_stack = FALSE
+)
 }
 \arguments{
 \item{points}{sfc object with a `date` associated with the point in yyyy-mm-dd format}
