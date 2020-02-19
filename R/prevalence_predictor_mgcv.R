@@ -47,12 +47,17 @@ prevalence_predictor_mgcv <- function(point_data, layer_names=NULL, v=10, exceed
               )
             
             if (response$status != 200) {
-              write(response, stderr())
-              stop('Problem retrieving covariate data')
+              message(response)
+              stop('Problem retrieving covariate data: non-200 response')
             }
   
             # Get contents of the response
             response_content <- content(response)
+
+            if (response_content$function_status != 'success') {
+              message(response_content)
+              stop('Problem retrieving covariate data: `function_status: error`')
+            }
             
             points_sf <- st_read(as.json(response_content$result), quiet = TRUE)
             points_sf$n_trials <- as.numeric(as.character(points_sf$n_trials))
