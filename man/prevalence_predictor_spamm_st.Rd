@@ -6,20 +6,12 @@
 and predict prevalence and excedance probabilities at spatial locations. 
 Currently only supports binomial data.}
 \usage{
-prevalence_predictor_spamm_st(
-  point_data,
-  time_field = NULL,
-  layer_names = NULL,
-  v = 20,
-  exceedance_threshold,
-  batch_size = NULL,
-  uncertainty_fieldname = NULL,
+prevalence_predictor_spamm_st(point_data, time_field = NULL,
+  layer_names = NULL, v = 20, exceedance_threshold,
+  batch_size = NULL, uncertainty_fieldname = NULL,
   additional_covariates = NULL,
   covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
-  seed = 1981,
-  fixed = TRUE,
-  fix_cov = NULL
-)
+  seed = 1981, fixed = FALSE, fix_cov = NULL)
 }
 \arguments{
 \item{point_data}{Required. An sf object of points containing at least `n_trials`, `n_positive` fields. 
@@ -49,7 +41,9 @@ include in the model. Defulats to NULL}
 to extract values of `layer_names` at locations specified in `point_data`. If this algorithm is hosted 
 somewhere other than the DiSARM API, include the URL here.}
 
-\item{fixed}{Logical indicating whether to fix the intercept at 0 and coefficient for cv_predicions_logit to 1. Defaults to TRUE.}
+\item{fixed}{Logical indicating whether to use logit transformed cv predictions and fix the intercept 
+at 0 and coefficient for cv_predicions_logit to 1. Defaults to FALSE, i.e. uses untransformed cv predictions without
+fixing coefficient}
 }
 \description{
 Function to fit spatio (and spatio-temporal) model 

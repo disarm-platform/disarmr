@@ -20,7 +20,9 @@
 #' @param uncertainty_fieldname If `batch_size` is specified (>0), adaptive sampling is performed. To sample
 #' in order to minimize classification uncertainty choose 'exceedance_probability'. To sample in order to minimize prediction
 #' error choose 'prevalence_bci_width'.
-#' @param fixed Logical indicating whether to fix the intercept at 0 and coefficient for cv_predicions_logit to 1. Defaults to TRUE.
+#' @param fixed Logical indicating whether to use logit transformed cv predictions and fix the intercept 
+#' at 0 and coefficient for cv_predicions_logit to 1. Defaults to FALSE, i.e. uses untransformed cv predictions without
+#' fixing coefficient
 #' @import geojsonio httr sf sp spaMM RANN
 #' @export
 
@@ -34,7 +36,7 @@ prevalence_predictor_spamm_st <- function(point_data,
                                       additional_covariates=NULL,
                                       covariate_extractor_url = "https://faas.srv.disarm.io/function/fn-covariate-extractor",
                                       seed = 1981,
-                                      fixed = TRUE,
+                                      fixed = FALSE,
                                       fix_cov = NULL) {
     
     set.seed(seed)
@@ -76,7 +78,7 @@ prevalence_predictor_spamm_st <- function(point_data,
             points_sf$n_trials <- as.numeric(as.character(points_sf$n_trials))
             points_sf$n_positive <- as.numeric(as.character(points_sf$n_positive))
         }
-        
+
         # Pass into cv-ml
         response_content <- cv_ml(points_sf, layer_names = c(layer_names, additional_covariates),
                                   k=v, fix_cov = fix_cov)
@@ -101,10 +103,12 @@ prevalence_predictor_spamm_st <- function(point_data,
                           data = train_data,
                           family=binomial())
           }else{
+
             lfit <- fitme(cbind(n_positive, n_neg) ~ 
                             cv_predictions +
                             Matern(1|X+Y),
                           init = list(rho = 1),
+                          #etaFix=list(beta=c(cv_predictions_logit=1)),
                           data = train_data,
                           family=binomial())
           }
@@ -127,6 +131,7 @@ prevalence_predictor_spamm_st <- function(point_data,
                           control.dist=list(rho.mapping=c(1,1,2)),
                           family=binomial())
         }else{
+
           lfit <- fitme(cbind(n_positive, n_neg) ~ 
                           cv_predictions +
                           Matern(1|X+Y+t),
