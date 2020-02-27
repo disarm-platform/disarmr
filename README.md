@@ -1,5 +1,5 @@
 # The DiSARM R package
-This package is very much **under construction**. Think of it more as a set of functions than a polished package...
+An experimental R package related to functions developed as part of the DiSARM project. No longer being supported. 
 
 To install
 ```{r}
